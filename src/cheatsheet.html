@@ -552,14 +552,14 @@ input.amt{width:6em;vertical-align:middle}
 
   // ---------- equipment ----------
   var EQ_KIND={heal:"Healing potion",use:"Consumable",gear:"Gear"};
-  if(!Array.isArray(state.eq)) state.eq=[
-    {id:"e1",name:"Potion of healing",qty:1,kind:"heal",detail:"2d4 + 2"},
-    {id:"e2",name:"Smith's tools",qty:1,kind:"gear"},
-    {id:"e3",name:"Thieves' tools",qty:1,kind:"gear"},
-    {id:"e4",name:"Tinker's tools",qty:1,kind:"gear"},
-    {id:"e5",name:"Light crossbow",qty:1,kind:"gear"},
-    {id:"e6",name:"Crossbow bolts",qty:20,kind:"gear"}
-  ];
+  // Seed = Solethis_5.pdf equipment box (armor and shield live in Loadout). The box is clipped after "belt".
+  var EQ_SEED=[["Shortsword",1],["Light crossbow",1],["Crossbow bolts",20],["Smith's tools",1],["Thieves' tools",1],["Tinker's tools",1],
+    ["Alchemist's supplies",1],["Dungeoneer's pack",1],["Bedroll",1],["Black ink",1],["Quill",1],["Small knife",1],["Common clothes",1],
+    ["Gold (gp)",94],["Silver (sp)",1],["Copper (cp)",5]];
+  // the first equipment build seeded a guessed list (ids e1..e6, incl. a potion); replace it if untouched
+  var EQ_OLD='[{"id":"e1","name":"Potion of healing","qty":1,"kind":"heal","detail":"2d4 + 2"},{"id":"e2","name":"Smith\'s tools","qty":1,"kind":"gear"},{"id":"e3","name":"Thieves\' tools","qty":1,"kind":"gear"},{"id":"e4","name":"Tinker\'s tools","qty":1,"kind":"gear"},{"id":"e5","name":"Light crossbow","qty":1,"kind":"gear"},{"id":"e6","name":"Crossbow bolts","qty":20,"kind":"gear"}]';
+  if(!Array.isArray(state.eq) || JSON.stringify(state.eq)===EQ_OLD)
+    state.eq=EQ_SEED.map(function(x,i){ return {id:"s"+i,name:x[0],qty:x[1],kind:"gear"}; });
   function hasItem(re){ return state.eq.some(function(x){ return x.qty>0&&re.test(x.name); }); }
   function eqById(id){ return state.eq.filter(function(x){ return x.id===id; })[0]; }
   function renderEq(){
