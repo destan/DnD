@@ -131,7 +131,7 @@ li{margin-bottom:6px}
 .sim{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:clip}
 .simhead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
 .simhead .rnd{font:800 1.1rem "Alegreya",Georgia,serif}
-.simhead .meta{font-size:.85rem;color:var(--muted)}
+.simhead .meta{display:block;font-size:.85rem;color:var(--muted)}
 .conc{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;border:1px solid var(--brass);color:var(--brass);border-radius:4px;padding:1px 4px 1px 8px}
 .conc button{min-width:36px;min-height:36px;border:0;background:none;color:inherit;font:700 .8rem "Alegreya Sans",sans-serif;cursor:pointer;padding:2px 4px}
 .steps{position:relative;display:flex;flex-wrap:nowrap;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;gap:5px;padding:10px 12px;border-bottom:1px solid var(--line);list-style:none;margin:0}
@@ -184,6 +184,15 @@ dl.roll dd{margin:0 0 8px}
 .summary li:first-child{border-top:0}
 .summary .k{font-weight:700;color:var(--brass)}
 .summary .v small{color:var(--muted)}
+/* sticky section bar */
+:root{scroll-padding-top:56px}
+@media (prefers-reduced-motion:no-preference){ :root{scroll-behavior:smooth} }
+.jump{position:sticky;top:0;z-index:2;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:10px -16px 0;padding:6px 16px;background:var(--paper);border-bottom:1px solid var(--line)}
+.jump::-webkit-scrollbar{display:none}
+.jump a{flex:none;display:flex;align-items:center;gap:5px;min-height:36px;padding:0 11px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);text-decoration:none;font:700 .85rem "Alegreya Sans",sans-serif;white-space:nowrap}
+.jump a b{font-variant-numeric:tabular-nums;color:var(--verd)}
+.jump a b.low{color:var(--warn)}
+.jump a:focus-visible{outline:3px solid var(--brass);outline-offset:1px}
 /* wider screens: enhance from the mobile base */
 @media (min-width:480px){
   main{padding-top:18px}
@@ -224,6 +233,16 @@ dl.roll dd{margin:0 0 8px}
     <div class="stat"><b>14</b><span>Passive Perc.</span></div>
   </div>
 
+  <nav class="jump" aria-label="Sections">
+    <a href="#hp">HP <b id="jumpHp"></b></a>
+    <a href="#hp">AC <b id="jumpAc"></b></a>
+    <a href="#sim">Simulator</a>
+    <a href="#tracker">Tracker</a>
+    <a href="#loadout">Loadout</a>
+    <a href="#turn">Turn</a>
+    <a href="#spells">Spells</a>
+  </nav>
+
   <h2 id="hp">Hit points</h2>
   <div class="hpbox">
     <div class="hpwho">
@@ -255,7 +274,7 @@ dl.roll dd{margin:0 0 8px}
     </div>
   </div>
 
-  <h2>Loadout</h2>
+  <h2 id="loadout">Loadout</h2>
   <div class="loadout">
     <div class="lrow"><span class="llab">Armor model</span>
       <div class="switch" role="group" aria-label="Armor model">
@@ -275,7 +294,7 @@ dl.roll dd{margin:0 0 8px}
   <div class="model" id="m-i" hidden></div>
   <p class="note">Armor is your spellcasting focus and can't be removed against your will. Switching model needs smith's tools in hand.</p>
 
-  <h2>On your turn</h2>
+  <h2 id="turn">On your turn</h2>
   <dl class="turn" id="turnList"></dl>
   <p class="note">Extra Attack only works with the Attack action; you can't swing twice and cast a leveled spell in the same turn.</p>
 
@@ -298,7 +317,7 @@ dl.roll dd{margin:0 0 8px}
   </div>
   <p class="note">Pick one option per slot, roll what the card says. Spell slots and uses you pick are marked in the tracker when you end the turn. Uses the armor model selected above.</p>
 
-  <h2>Spells</h2>
+  <h2 id="spells">Spells</h2>
   <p class="note">Slots: 4 × 1st, 2 × 2nd. Save DC 16, spell attack +8. <span class="chip c">C</span> = concentration (one at a time).</p>
 
   <h3><span class="lvl-c">Cantrip</span> Cantrips (at will, no slot)</h3>
@@ -380,7 +399,7 @@ dl.roll dd{margin:0 0 8px}
     <li id="acNote"></li>
   </ul>
 
-  <h2>Tracker</h2>
+  <h2 id="tracker">Tracker</h2>
   <div class="track" id="track"></div>
   <button type="button" class="btn reset" id="reset">Long rest: reset all</button>
   <p class="note">Tap a pip to mark it used. Long rest also restores HP and clears temp HP. It doesn't refill Mind Sharpener: it regains 1d4 charges at dawn, so tap those back yourself. Saved on this device only.</p>
@@ -427,7 +446,7 @@ dl.roll dd{margin:0 0 8px}
     document.getElementById("m-g").hidden = m!=="g";
     document.getElementById("m-i").hidden = m!=="i";
     document.getElementById("spd").textContent = m==="i" ? "35" : "30";
-    document.getElementById("ac").textContent = AC();
+    document.getElementById("ac").textContent = document.getElementById("jumpAc").textContent = AC();
 
     // infusion toggles
     var full=state.inf.length>=INF_MAX, tg=document.getElementById("infToggles"); tg.innerHTML="";
@@ -527,7 +546,8 @@ dl.roll dd{margin:0 0 8px}
   function setVal(id,v){ var el=$(id); if(document.activeElement!==el) el.value=v; }
   function renderHP(){
     var h=state.hp, tot=Math.max(h.max,h.cur+h.temp);
-    $("hpStat").textContent=h.cur+(h.temp?"+"+h.temp:"")+"/"+h.max;
+    $("hpStat").textContent=$("jumpHp").textContent=h.cur+(h.temp?"+"+h.temp:"")+"/"+h.max;
+    $("jumpHp").className = h.cur<=h.max/4 ? "low" : "";
     $("hpRead").textContent=h.cur+" / "+h.max+(h.temp?"  ·  "+h.temp+" temp":"");
     var bar=$("hpBar"); bar.style.width=(100*h.cur/tot)+"%"; bar.className=h.cur<=h.max/4?"low":"";
     $("hpTmpBar").style.width=(100*h.temp/tot)+"%";
@@ -554,6 +574,8 @@ dl.roll dd{margin:0 0 8px}
   $("hpTemp").onchange=function(){ state.hp.temp=Math.max(0,num(this.value,state.hp.temp)); save(); renderHP(); };
   $("hhCur").onchange=function(){ state.hhp=Math.max(0,Math.min(HOMU_MAX,num(this.value,state.hhp))); save(); renderHP(); };
   $("hhDmg").onclick=function(){ var n=num($("hhAmt").value,0); if(n<=0) return; state.hhp=Math.max(0,state.hhp-n); $("hhMsg").textContent=state.hhp===0?"At 0 HP it dies and vanishes, leaving its heart gem behind. Re-infuse it on a long rest.":"Took "+n+"."; $("hhAmt").value=""; save(); renderHP(); };
+  // phones: close the number keyboard once an HP action is applied
+  document.querySelectorAll(".hpact .btn").forEach(function(b){ b.addEventListener("click",function(){ var a=document.activeElement; if(a&&a.tagName==="INPUT") a.blur(); }); });
   $("hhHeal").onclick=function(){ var n=num($("hhAmt").value,0); if(n<=0) return; state.hhp=Math.min(HOMU_MAX,state.hhp+n); $("hhMsg").textContent="Healed. Casting Mending on it restores 2d6."; $("hhAmt").value=""; save(); renderHP(); };
 
   function refresh(){ refreshRes(); renderLoadout(); renderTrack(); renderHP(); sim(); }
@@ -745,7 +767,29 @@ dl.roll dd{margin:0 0 8px}
   }
   function esc(t){ return String(t).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
 
+  // Mobile: keep the part you're acting on in view (Back/Next are sticky at the bottom).
+  var shownCur=-1, revealCard=false;
+  function topChrome(){ var j=document.querySelector(".jump"); return j ? j.offsetHeight : 0; }
+  function smooth(){ return matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"; }
+  function keepInView(stepChanged){
+    if(revealCard){
+      revealCard=false;
+      var c=elPanel.querySelector(".card"); if(!c) return;
+      var nav=elNext.parentNode, navH=getComputedStyle(nav).position==="sticky" ? nav.offsetHeight : 0;
+      var r=c.getBoundingClientRect(), limit=innerHeight-navH;
+      // bring the card's bottom above the sticky bar, but never push its top off screen
+      if(r.bottom>limit){ var d=Math.min(r.bottom-limit+8, r.top-topChrome()-8); if(d>0) scrollBy({top:d,behavior:smooth()}); }
+    } else if(stepChanged){
+      // new step: if its question scrolled off the top, bring the step strip back
+      var t=elSteps.getBoundingClientRect().top-topChrome();
+      if(t<0) scrollBy({top:t-8,behavior:smooth()});
+    }
+  }
   function sim(){
+    var changed=cur!==shownCur;
+    render(); shownCur=cur; keepInView(changed);
+  }
+  function render(){
     clean();
     var st=steps(); if(cur>st.length) cur=st.length;
     document.getElementById("simRound").textContent="Round "+state.round;
@@ -825,7 +869,7 @@ dl.roll dd{margin:0 0 8px}
       if(sel&&sel.id===o.id){ delete turn[sid]; delete out[sid]; }
       else{
         var lv=null; if(o.lv){ lv=o.lv.filter(function(l){ return lvOk(o,l,sid); })[0]; }
-        turn[sid]={id:o.id,lv:lv}; delete out[sid];
+        turn[sid]={id:o.id,lv:lv}; delete out[sid]; revealCard=true;
       }
       sim();
     }; });
