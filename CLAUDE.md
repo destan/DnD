@@ -7,20 +7,19 @@ Single-page D&D 5e cheatsheet + turn simulator for **Solethis "Sol" Starglance**
 - `src/cheatsheet.html` — the whole app (HTML + inline CSS + inline JS). It is an Artifact *body*: no `<!doctype>`, `<html>`, `<head>` or `<body>`; the host adds the skeleton at publish time. Keep it that way.
 - `scripts/build.mjs` — wraps the body into `dist/index.html` for local preview/tests.
 - `tests/smoke.mjs` — Playwright smoke test against `dist/index.html`.
-- `reference/Solethis_5.pdf` — the character sheet (source of truth for numbers).
-- `reference/dragonlance-journal.txt` — session journal written by Malakai; party context.
+- `reference/` — gitignored, local only, never commit: `Solethis_5.pdf` (character sheet, source of truth for numbers) and `dragonlance-journal.txt` (session journal by Malakai). Not present in a fresh clone; ask the user if you need it.
 
 ## Commands
 
 ```sh
-npm install          # playwright
+npm install          # playwright (pinned to 1.56.1, matches the Chromium preinstalled in Claude Code cloud sessions)
 npm run build        # -> dist/index.html
-npm test             # smoke test (needs build first)
+npm test             # builds, then runs the smoke test
 ```
 
 ## Publishing
 
-GitHub Pages: https://dorukdestan.com/DnD/. `.github/workflows/pages.yml` runs build + smoke test on every push/PR and deploys `dist/` on push to `main`. The build wrapper is the page skeleton, so keep `scripts/build.mjs` in sync with anything the page needs in `<head>`.
+GitHub Pages: https://dorukdestan.com/DnD/. `.github/workflows/pages.yml` runs the smoke test on every push/PR and deploys `dist/` on push to `main`. The build wrapper is the page skeleton, so keep `scripts/build.mjs` in sync with anything the page needs in `<head>`.
 
 Artifact page: https://claude.ai/artifact/Grs1tdXE2i9FkjKQyay9dr (private, owned by destan@destan.dev).
 Republish by passing that URL as `url` to the Artifact tool with `file_path: src/cheatsheet.html`. Read it first (`action: "read"`) in a new session; the tool refuses a publish to an artifact the session hasn't read. Omit `icon` on republish.

@@ -11,7 +11,7 @@ Live: https://dorukdestan.com/DnD/ (GitHub Pages, deployed from `main` by `.gith
 Artifact version: https://claude.ai/artifact/Grs1tdXE2i9FkjKQyay9dr
 
 ```sh
-npm install && npm run build && npm test
+npm install && npm test   # test builds dist/ first
 open dist/index.html
 ```
 

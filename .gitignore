@@ -1,2 +1,4 @@
 node_modules/
 dist/
+# character sheet + session journal: kept local, never published
+reference/
