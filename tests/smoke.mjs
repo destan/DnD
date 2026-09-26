@@ -44,6 +44,22 @@ for (let i = 0; i < 8; i++) { const t = await page.textContent("#simNext"); awai
 assert.match(await page.textContent("#simFx"), /roll 4d4 acid/);
 assert.match(await page.textContent("#simConc"), /Caustic Brew/);
 
+// Equipment: drinking the potion heals on end turn and uses it up; the option then disappears
+await page.click("#simNew");
+await page.click("#simNext");
+await page.click('.opt[data-o="item-e1"]');
+await page.fill("#itemAmt", "6"); await page.dispatchEvent("#itemAmt", "change");
+for (let i = 0; i < 8; i++) { const t = await page.textContent("#simNext"); await page.click("#simNext"); if (t === "End turn") break; }
+assert.equal(await page.textContent("#hpStat"), "37/38");
+assert.match(await page.textContent("#eqList"), /Potion of healing−0\+/);
+await page.click("#simNext");
+assert.equal(await page.$('.opt[data-o="item-e1"]'), null);
+// Adding a consumable makes it usable
+await page.fill("#eqName", "Alchemist's fire"); await page.fill("#eqQty", "2");
+await page.selectOption("#eqKind", "use"); await page.fill("#eqDetail", "1d4 fire per turn");
+await page.click("#eqAdd button[type=submit]");
+assert.ok(await page.$('.opt[data-o^="item-"]'));
+
 assert.deepEqual(errors, []);
 await browser.close();
 console.log("smoke: ok");

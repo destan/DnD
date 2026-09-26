@@ -184,6 +184,24 @@ dl.roll dd{margin:0 0 8px}
 .summary li:first-child{border-top:0}
 .summary .k{font-weight:700;color:var(--brass)}
 .summary .v small{color:var(--muted)}
+/* equipment */
+.eq{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 12px}
+.eqrow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.eqrow:first-child{border-top:0}
+.eqrow.out .eqn,.eqrow.out .eqd{opacity:.55}
+.eqn{font-weight:700;overflow-wrap:anywhere}
+.eqd{grid-column:1/2;font-size:.85rem;color:var(--muted);overflow-wrap:anywhere}
+.qty{grid-row:1/3;grid-column:2;display:flex;align-items:center;gap:4px}
+.qty button{min-width:40px;min-height:40px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:6px;font:700 1rem "Alegreya Sans",sans-serif;cursor:pointer;padding:0 8px}
+.qty button.del{color:var(--warn);margin-left:4px}
+.qty b{min-width:2em;text-align:center;font-variant-numeric:tabular-nums}
+.eqadd{display:grid;grid-template-columns:1fr 5em;gap:6px;padding:10px 0;border-top:1px solid var(--line)}
+.eqadd>*{grid-column:1/-1}
+.eqadd #eqName{grid-column:1/2}.eqadd #eqQty{grid-column:2/3}
+.eqadd input,.eqadd select,input.amt{min-height:44px;min-width:0;width:100%;font:700 1rem "Alegreya Sans",sans-serif;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+input.amt{width:6em;vertical-align:middle}
+.eqadd input:focus-visible,.eqadd select:focus-visible,input.amt:focus-visible{outline:3px solid var(--brass);outline-offset:1px}
+.opt.item{border-left:4px solid var(--force)}
 /* sticky section bar */
 :root{scroll-padding-top:56px}
 @media (prefers-reduced-motion:no-preference){ :root{scroll-behavior:smooth} }
@@ -209,6 +227,9 @@ dl.roll dd{margin:0 0 8px}
   .summary li{grid-template-columns:8.5em 1fr;gap:10px}
   .nav{position:static;padding-bottom:10px}
   .nav #simNext{flex:none}
+  .eqadd{grid-template-columns:1fr 5em 11em auto}
+  .eqadd>*{grid-column:auto}.eqadd #eqName,.eqadd #eqQty{grid-column:auto}
+  .eqadd #eqDetail{grid-column:1/4}
 }
 /* mouse/trackpad: tighten the touch-sized targets */
 @media (hover:hover) and (pointer:fine){
@@ -238,6 +259,7 @@ dl.roll dd{margin:0 0 8px}
     <a href="#hp">AC <b id="jumpAc"></b></a>
     <a href="#sim">Simulator</a>
     <a href="#tracker">Tracker</a>
+    <a href="#equipment">Gear</a>
     <a href="#loadout">Loadout</a>
     <a href="#turn">Turn</a>
     <a href="#spells">Spells</a>
@@ -292,7 +314,7 @@ dl.roll dd{margin:0 0 8px}
 
   <div class="model" id="m-g"></div>
   <div class="model" id="m-i" hidden></div>
-  <p class="note">Armor is your spellcasting focus and can't be removed against your will. Switching model needs smith's tools in hand.</p>
+  <p class="note" id="modelNote"></p>
 
   <h2 id="turn">On your turn</h2>
   <dl class="turn" id="turnList"></dl>
@@ -403,6 +425,23 @@ dl.roll dd{margin:0 0 8px}
   <div class="track" id="track"></div>
   <button type="button" class="btn reset" id="reset">Long rest: reset all</button>
   <p class="note">Tap a pip to mark it used. Long rest also restores HP and clears temp HP. It doesn't refill Mind Sharpener: it regains 1d4 charges at dawn, so tap those back yourself. Saved on this device only.</p>
+
+  <h2 id="equipment">Equipment</h2>
+  <div class="eq">
+    <div id="eqList"></div>
+    <form class="eqadd" id="eqAdd">
+      <input id="eqName" required placeholder="Item name" aria-label="Item name" autocomplete="off">
+      <input id="eqQty" type="number" inputmode="numeric" min="0" value="1" aria-label="Quantity">
+      <select id="eqKind" aria-label="Item type">
+        <option value="gear">Gear</option>
+        <option value="heal">Healing potion</option>
+        <option value="use">Consumable</option>
+      </select>
+      <input id="eqDetail" placeholder="Effect" aria-label="Effect" autocomplete="off" hidden>
+      <button type="submit" class="btn">Add item</button>
+    </form>
+  </div>
+  <p class="note">Healing potions and consumables show up as <i>Use an item</i> in the simulator's action step; ending the turn uses one up. Long rest doesn't touch equipment. Saved on this device only.</p>
 </main>
 <script>
 (function(){
@@ -506,8 +545,50 @@ dl.roll dd{margin:0 0 8px}
       il.insertAdjacentHTML("beforeend",'<div class="row'+(act?"":" inactive")+'"><span class="name">'+e_(f.name)+'</span> <span class="chips"><span class="chip '+(act?"on":"off")+'">'+(act?"Active":"Known")+'</span></span><div class="eff">'+e_(f.desc+extra)+'</div></div>');
     });
 
+    document.getElementById("modelNote").innerHTML="Armor is your spellcasting focus and can't be removed against your will. Switching model needs smith's tools in hand."+(hasItem(/smith/i)?"":' <span class="warn">No smith\'s tools in your equipment.</span>');
+
     document.getElementById("acNote").innerHTML='<b>AC '+AC()+'</b> = scale mail 14 + DEX 2'+(state.shield?" + shield 2":"")+(on("ed")?" + Enhanced Defense 1":"")+'. The printed sheet says 18.';
   }
+
+  // ---------- equipment ----------
+  var EQ_KIND={heal:"Healing potion",use:"Consumable",gear:"Gear"};
+  if(!Array.isArray(state.eq)) state.eq=[
+    {id:"e1",name:"Potion of healing",qty:1,kind:"heal",detail:"2d4 + 2"},
+    {id:"e2",name:"Smith's tools",qty:1,kind:"gear"},
+    {id:"e3",name:"Thieves' tools",qty:1,kind:"gear"},
+    {id:"e4",name:"Tinker's tools",qty:1,kind:"gear"},
+    {id:"e5",name:"Light crossbow",qty:1,kind:"gear"},
+    {id:"e6",name:"Crossbow bolts",qty:20,kind:"gear"}
+  ];
+  function hasItem(re){ return state.eq.some(function(x){ return x.qty>0&&re.test(x.name); }); }
+  function eqById(id){ return state.eq.filter(function(x){ return x.id===id; })[0]; }
+  function renderEq(){
+    var h="";
+    state.eq.forEach(function(x){
+      h+='<div class="eqrow'+(x.qty>0?"":" out")+'"><span class="eqn">'+e_(x.name)+'</span>'+
+        '<span class="qty"><button type="button" data-eq="'+x.id+'" data-d="-1" aria-label="One fewer '+e_(x.name)+'"'+(x.qty>0?"":" disabled")+'>−</button><b>'+x.qty+'</b>'+
+        '<button type="button" data-eq="'+x.id+'" data-d="1" aria-label="One more '+e_(x.name)+'">+</button>'+
+        '<button type="button" class="del" data-eq="'+x.id+'" data-d="x" aria-label="Remove '+e_(x.name)+'">✕</button></span>'+
+        '<span class="eqd">'+e_(EQ_KIND[x.kind]+(x.detail?(x.kind==="heal"?": heals ":": ")+x.detail:""))+'</span></div>';
+    });
+    var l=document.getElementById("eqList"); l.innerHTML=h||'<div class="eqrow"><span class="eqd">No items.</span></div>';
+    l.querySelectorAll("[data-eq]").forEach(function(b){ b.onclick=function(){
+      var x=eqById(b.dataset.eq); if(!x) return;
+      if(b.dataset.d==="x") state.eq=state.eq.filter(function(y){ return y!==x; });
+      else x.qty=Math.max(0,x.qty+(+b.dataset.d));
+      save(); refresh();
+    }; });
+  }
+  var eqKind=document.getElementById("eqKind"), eqDetail=document.getElementById("eqDetail");
+  function eqForm(){ var k=eqKind.value; eqDetail.hidden=k==="gear"; eqDetail.placeholder=k==="heal"?"Heals, e.g. 2d4 + 2":"Effect, e.g. 1 min of bright light"; eqDetail.setAttribute("aria-label",eqDetail.placeholder); }
+  eqKind.onchange=eqForm; eqForm();
+  document.getElementById("eqAdd").onsubmit=function(ev){
+    ev.preventDefault();
+    var name=document.getElementById("eqName").value.trim(); if(!name) return;
+    var q=parseInt(document.getElementById("eqQty").value,10), k=eqKind.value, dt=eqDetail.value.trim();
+    state.eq.push({id:"e"+Date.now().toString(36),name:name,qty:isNaN(q)?1:Math.max(0,q),kind:k,detail:k==="gear"?"":(dt||(k==="heal"?"2d4 + 2":""))});
+    this.reset(); eqForm(); save(); refresh();
+  };
 
   // ---------- tracker ----------
   var RES=[], MAX={};
@@ -567,7 +648,8 @@ dl.roll dd{margin:0 0 8px}
     hpSay(parts.join(" "));
   }
   $("hpDmg").onclick=function(){ var n=num($("hpAmt").value,0); if(n<=0) return; damage(n); $("hpAmt").value=""; save(); renderHP(); sim(); };
-  $("hpHeal").onclick=function(){ var n=num($("hpAmt").value,0); if(n<=0) return; var was=state.hp.cur; state.hp.cur=Math.min(state.hp.max,state.hp.cur+n); hpSay("Healed "+(state.hp.cur-was)+"."); $("hpAmt").value=""; save(); renderHP(); };
+  function heal(n){ var was=state.hp.cur; state.hp.cur=Math.min(state.hp.max,state.hp.cur+n); return state.hp.cur-was; }
+  $("hpHeal").onclick=function(){ var n=num($("hpAmt").value,0); if(n<=0) return; hpSay("Healed "+heal(n)+"."); $("hpAmt").value=""; save(); renderHP(); };
   $("hpTmpSet").onclick=function(){ var n=num($("hpAmt").value,-1); if(n<0) return; state.hp.temp=n; hpSay("Temp HP set to "+n+". Temp HP doesn't stack: a new source replaces the old one."); $("hpAmt").value=""; save(); renderHP(); };
   $("hpCur").onchange=function(){ state.hp.cur=Math.max(0,Math.min(state.hp.max,num(this.value,state.hp.cur))); save(); renderHP(); };
   $("hpMax").onchange=function(){ state.hp.max=Math.max(1,num(this.value,state.hp.max)); state.hp.cur=Math.min(state.hp.cur,state.hp.max); save(); renderHP(); };
@@ -578,7 +660,7 @@ dl.roll dd{margin:0 0 8px}
   document.querySelectorAll(".hpact .btn").forEach(function(b){ b.addEventListener("click",function(){ var a=document.activeElement; if(a&&a.tagName==="INPUT") a.blur(); }); });
   $("hhHeal").onclick=function(){ var n=num($("hhAmt").value,0); if(n<=0) return; state.hhp=Math.min(HOMU_MAX,state.hhp+n); $("hhMsg").textContent="Healed. Casting Mending on it restores 2d6."; $("hhAmt").value=""; save(); renderHP(); };
 
-  function refresh(){ refreshRes(); renderLoadout(); renderTrack(); renderHP(); sim(); }
+  function refresh(){ refreshRes(); renderLoadout(); renderTrack(); renderHP(); renderEq(); sim(); }
 
   // ---------- turn simulator ----------
   function M(){ return state.model==="i" ? "i" : "g"; }
@@ -631,6 +713,24 @@ dl.roll dd{margin:0 0 8px}
   function atkOpts(slot){ var a=[{id:"strike",name:M()==="g"?"Gauntlet strike":"Launcher shot",tags:[sg(W(M()).atk)],outcome:true,card:function(){ return attackCard(slot); }}];
     sword.tags=[sg(W("s").atk),"melee"];
     if(M()==="i") a.push(sword); a.push(grapple); return a; }
+  // Usable equipment: one option per heal/consumable item with stock left (hidden at 0).
+  function itemOpts(){ return state.eq.filter(function(x){ return x.kind!=="gear"&&x.qty>0; }).map(function(x){
+    var heal=x.kind==="heal";
+    return {id:"item-"+x.id,item:x.id,name:(heal?"Drink ":"Use ")+x.name,tags:[heal?"heals "+(x.detail||"?"):"action",x.qty+" left"],card:function(){
+      var c=turn.action||{}, who=c.who||"self", rows=[], notes=[];
+      if(heal){
+        rows.push(["Heal", d(esc(x.detail||"?"))]);
+        rows.push(["Who",'<div class="seg" role="group" aria-label="Who drinks it" style="margin:0">'+[["self","Sol"],["ally","Ally within 5 ft"]].map(function(w){ return '<button type="button" data-who="'+w[0]+'" aria-pressed="'+(who===w[0]?"true":"false")+'">'+w[1]+'</button>'; }).join("")+'</div>']);
+        if(who==="self") rows.push(["You rolled",'<input class="amt" id="itemAmt" type="number" inputmode="numeric" min="0" placeholder="Total" aria-label="Amount healed"'+(c.amt?' value="'+c.amt+'"':"")+'> <span class="vs">added to your HP when you end the turn</span>']);
+        notes.push("2014 rules: drinking a potion, or feeding it to an ally, takes your action. Some DMs use the 2024 bonus-action rule; ask.");
+      }else{
+        rows.push(["Effect", x.detail?esc(x.detail):"As the item describes."]);
+        notes.push("Using an item takes your action (the Use an Object action).");
+      }
+      notes.push(x.qty+" in your equipment; ending the turn uses one.");
+      return {rows:rows,notes:notes};
+    }};
+  }); }
   var OPTS={
     move:function(){ return [
       {id:"move",name:"Move",tags:["up to "+S()+" ft"],card:function(){ return {rows:[["Distance", d(S()+" ft")+(turn.action&&turn.action.id==="dash"?' <span class="vs">+ '+S()+' ft from Dash</span>':"")]],notes:[
@@ -660,7 +760,7 @@ dl.roll dd{margin:0 0 8px}
       {id:"help",name:"Help",tags:["ally advantage"],card:function(){ return {rows:[["Effect","One ally gets advantage on its next attack against a creature within 5 ft of you, or on an ability check."]],notes:["Lasts until the start of your next turn.","Best on Malakai's next swing if he acts before you do again."]}; }},
       {id:"hide",name:"Hide",tags:["Stealth"],card:function(){ return {rows:[["You roll", d(M()==="i"?"d20 + 5":"d20 + 5, disadvantage")+' <span class="vs">(Stealth)</span>'+vs("each enemy's passive Perception")]],notes:[M()==="i"?"Dampening Field advantage cancels scale mail's disadvantage: roll once.":"Scale mail gives disadvantage on Stealth in Guardian.","You need cover or heavy obscurement to try."]}; }},
       {id:"ready",name:"Ready",tags:["uses reaction"],card:function(){ return {rows:[["Now","Name a trigger and the action you'll take."],["When it fires","Use your reaction to act."]],notes:["A readied spell uses its slot now and needs concentration until it goes off.","A readied Attack is only one attack (no Extra Attack)."]}; }}
-    ]; },
+    ].concat(itemOpts()); },
     atk1:function(){ return atkOpts("atk1"); },
     atk2:function(){ return atkOpts("atk2"); },
     bonus:function(){ return [
@@ -749,7 +849,7 @@ dl.roll dd{margin:0 0 8px}
   if(!Array.isArray(state.fx)) state.fx=[];
   // one-time migration: old concentration without an effect entry stays as a badge only
   function dropConc(){ state.conc=null; state.fx=state.fx.filter(function(f){ return !f.conc; }); }
-  function kindOf(o,slot){ if(slot==="action"&&o.id==="attack") return "weapon"; return o.leveled?"spell":(o.spell?"cantrip":"other"); }
+  function kindOf(o,slot){ if(slot==="action"&&o.id==="attack") return "weapon"; if(o.item) return "item"; return o.leveled?"spell":(o.spell?"cantrip":"other"); }
   function lvlBadge(o){ if(!o.lv) return "Cantrip"; var n=o.lv.filter(function(l){ return l!=="free"; }); var m=Math.min.apply(null,n); return m===1?"1st":"2nd"; }
   function renderFx(){
     var box=document.getElementById("simFx");
@@ -821,7 +921,7 @@ dl.roll dd{margin:0 0 8px}
     if(sid==="homu") h+='<p class="hint">It acts right after your turn.'+(turn.bonus&&turn.bonus.id==="homu"?" You commanded it.":" You didn't command it, so it Dodges.")+'</p>';
     h+='<div class="opts">';
     var opts=opts_(sid), reason=null;
-    var GRP=[["weapon","Weapon"],["cantrip","Cantrips · at will, no slot"],["spell","Spells · use a slot"],["other",sid==="action"?"Other actions":"Other"]];
+    var GRP=[["weapon","Weapon"],["cantrip","Cantrips · at will, no slot"],["spell","Spells · use a slot"],["other",sid==="action"?"Other actions":"Other"],["item","Items · use an object"]];
     var kinds={}; opts.forEach(function(o){ kinds[kindOf(o,sid)]=1; });
     var grouped=Object.keys(kinds).length>1 && (kinds.cantrip||kinds.spell);
     GRP.forEach(function(g){
@@ -874,6 +974,8 @@ dl.roll dd{margin:0 0 8px}
       sim();
     }; });
     elPanel.querySelectorAll("[data-lv]").forEach(function(b){ b.onclick=function(){ var v=b.dataset.lv; turn[sid].lv = v==="free"?"free":+v; sim(); }; });
+    elPanel.querySelectorAll("[data-who]").forEach(function(b){ b.onclick=function(){ turn[sid].who=b.dataset.who; sim(); }; });
+    var ia=elPanel.querySelector("#itemAmt"); if(ia) ia.onchange=function(){ turn[sid].amt=Math.max(0,num(this.value,0)); };
     elPanel.querySelectorAll("[data-out]").forEach(function(b){ b.onclick=function(){ out[sid] = out[sid]===b.dataset.out ? undefined : b.dataset.out; if(!out[sid]) delete out[sid]; sim(); }; });
   }
 
@@ -893,11 +995,19 @@ dl.roll dd{margin:0 0 8px}
     h+='</ul>';
     var names={}; RES.forEach(function(r){ names[r[0]]=r[1].replace(/s$/,""); });
     var cs=costs();
-    h+='<p class="note">'+(cs.length ? "Uses: "+esc(cs.map(function(k){ return names[k]; }).join(", "))+". End turn marks them in the tracker." : "Uses no limited resources.")+'</p>';
+    var iu=itemUse(), used=cs.map(function(k){ return names[k]; });
+    if(iu) used.push(iu.x.name+" ("+(iu.x.qty-1)+" left after)");
+    h+='<p class="note">'+(used.length ? "Uses: "+esc(used.join(", "))+". End turn marks them in the tracker and equipment." : "Uses no limited resources.")+'</p>';
+    if(iu&&iu.x.kind==="heal"&&(iu.c.who||"self")==="self") h+='<p class="note">'+(iu.c.amt?"Heals you "+iu.c.amt+" HP on end turn.":'<span class="warn">No heal roll entered: add it in the Action step, or heal in the HP box.</span>')+'</p>';
     elPanel.innerHTML=h;
   }
 
+  function itemUse(){ var c=turn.action, o=c&&findOpt("action",c.id), x=o&&o.item&&eqById(o.item); return x?{o:o,c:c,x:x}:null; }
   function endTurn(){
+    var iu=itemUse();
+    if(iu){ iu.x.qty=Math.max(0,iu.x.qty-1);
+      if(iu.x.kind==="heal"&&(iu.c.who||"self")==="self") hpSay(iu.c.amt ? iu.x.name+": healed "+heal(iu.c.amt)+"." : iu.x.name+" used: enter what you rolled and tap Heal.");
+      renderEq(); renderLoadout(); }
     costs().forEach(function(k){ state.used[k]=Math.min(MAX[k],(state.used[k]||0)+1); });
     var R0=state.round;
     Object.keys(turn).forEach(function(s){

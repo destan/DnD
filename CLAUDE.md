@@ -42,7 +42,8 @@ A duplicate "(Copy)" artifact exists (Y6VckNyFX8Y16Hrzd9dksX); it is stale, not 
 
 ## Code map (inside the `<script>`)
 
-- `state` persisted in `localStorage["sol-sheet-v1"]` (per device): `model`, `inf[]`, `ew`, `shield`, `used{}` (resource pips), `round`, `conc`, `fx[]` (ongoing effects), `hp{cur,max,temp}`, `hhp`.
+- `state` persisted in `localStorage["sol-sheet-v1"]` (per device): `model`, `inf[]`, `ew`, `shield`, `used{}` (resource pips), `round`, `conc`, `fx[]` (ongoing effects), `hp{cur,max,temp}`, `hhp`, `eq[]` (equipment `{id,name,qty,kind:gear|heal|use,detail}`).
 - Loadout: `INF`, `W()`, `renderLoadout()`; tracker: `refreshRes()`, `renderTrack()`; HP: `renderHP()`, `damage()`.
 - Simulator: `OPTS[slot]()` option factories, `SLOTS` (with `when`), `whyDisabled()`, `sim()`, `renderSummary()`, `endTurn()`.
+- Equipment: `renderEq()`, `hasItem(re)` (e.g. smith's tools warning in the model note); `itemOpts()` adds one action option per heal/use item with qty > 0; `endTurn()` decrements it and applies a self-heal roll (`turn.action.who/amt`). Seed inventory is a guess, not from the sheet.
 - Ongoing effects: `LAST[optionId](lv)` → `{len, text, acid, dice}`; created in `endTurn()`, pruned when `state.round > until`; `dropConc()` clears concentration effects.
