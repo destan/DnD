@@ -7,7 +7,7 @@ Interactive cheatsheet and turn simulator for Sol, an Armorer artificer (level 5
 - Turn simulator: pick an option per slot, see what to roll, what to add and what to compare against
 - Ongoing-effects reminders (e.g. Caustic Brew acid each round) and a resource tracker
 
-Live: https://destan.github.io/DnD/ (GitHub Pages, deployed from `main` by `.github/workflows/pages.yml`)
+Live: https://dorukdestan.com/DnD/ (GitHub Pages, deployed from `main` by `.github/workflows/pages.yml`)
 Artifact version: https://claude.ai/artifact/Grs1tdXE2i9FkjKQyay9dr
 
 ```sh

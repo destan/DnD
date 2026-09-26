@@ -20,7 +20,7 @@ npm test             # smoke test (needs build first)
 
 ## Publishing
 
-GitHub Pages: https://destan.github.io/DnD/. `.github/workflows/pages.yml` runs build + smoke test on every push/PR and deploys `dist/` on push to `main`. The build wrapper is the page skeleton, so keep `scripts/build.mjs` in sync with anything the page needs in `<head>`.
+GitHub Pages: https://dorukdestan.com/DnD/. `.github/workflows/pages.yml` runs build + smoke test on every push/PR and deploys `dist/` on push to `main`. The build wrapper is the page skeleton, so keep `scripts/build.mjs` in sync with anything the page needs in `<head>`.
 
 Artifact page: https://claude.ai/artifact/Grs1tdXE2i9FkjKQyay9dr (private, owned by destan@destan.dev).
 Republish by passing that URL as `url` to the Artifact tool with `file_path: src/cheatsheet.html`. Read it first (`action: "read"`) in a new session; the tool refuses a publish to an artifact the session hasn't read. Omit `icon` on republish.
