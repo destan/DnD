@@ -1,0 +1,857 @@
+<title>Sol Starglance – Armorer cheatsheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700;800&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EAEFEA; --panel:#F8FAF7; --ink:#1E2A27; --muted:#5A6B66; --line:#C9D5D0;
+  --brass:#94651C; --verd:#2F6F63; --verd-soft:#DCEAE5; --warn:#A5461F;
+  --thunder:#6D4FB8; --lightning:#1F6FB8; --force:#B8501A; --acid:#557F16; --psychic:#A83A73; --pierce:#5A6B66;
+  box-sizing:border-box;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  color-scheme:dark;
+  --paper:#111917; --panel:#18231F; --ink:#E3ECE8; --muted:#95A8A2; --line:#2B3A36;
+  --brass:#D8A95E; --verd:#72BBA9; --verd-soft:#1F332D; --warn:#EE9A74;
+  --thunder:#AE98EC; --lightning:#7FB8F2; --force:#F0A06E; --acid:#A9D466; --psychic:#E68DBF; --pierce:#95A8A2;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#111917; --panel:#18231F; --ink:#E3ECE8; --muted:#95A8A2; --line:#2B3A36;
+  --brass:#D8A95E; --verd:#72BBA9; --verd-soft:#1F332D; --warn:#EE9A74;
+  --thunder:#AE98EC; --lightning:#7FB8F2; --force:#F0A06E; --acid:#A9D466; --psychic:#E68DBF; --pierce:#95A8A2;
+}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.45 "Alegreya Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:720px;margin:0 auto;padding:18px 16px 48px}
+h1,h2,h3{font-family:"Alegreya",Georgia,serif;margin:0;line-height:1.15;text-wrap:balance}
+h1{font-size:2rem;font-weight:800}
+h2{font-size:1.35rem;font-weight:700;margin:30px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--brass)}
+h3{font-size:1.05rem;font-weight:700;margin:16px 0 6px;color:var(--verd)}
+p{margin:0 0 8px}
+.sub{color:var(--muted);margin-top:2px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 4px;text-align:center}
+.stat b{display:block;font:800 1.35rem/1.1 "Alegreya",Georgia,serif}
+.stat span{font-size:.78rem;color:var(--muted)}
+.switch{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;margin:4px 0 12px}
+.switch button{flex:1;border:0;background:none;color:var(--ink);font:700 1rem "Alegreya Sans",sans-serif;padding:9px 6px;border-radius:999px;cursor:pointer}
+.switch button[aria-pressed="true"]{background:var(--verd);color:var(--panel)}
+button:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+.model{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--verd);border-radius:6px;padding:12px 14px}
+.weapon{font-size:1.05rem;margin-bottom:6px}
+.big{font:800 1.15rem "Alegreya",Georgia,serif}
+.rows{background:var(--panel);border:1px solid var(--line);border-radius:6px}
+.row{padding:9px 12px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row .name{font-weight:700}
+.chips{display:inline-flex;flex-wrap:wrap;gap:4px;margin-left:4px;vertical-align:1px}
+.chip{font-size:.74rem;padding:1px 7px;border-radius:4px;background:var(--verd-soft);color:var(--ink);white-space:nowrap}
+.chip.c{background:none;border:1px solid var(--brass);color:var(--brass)}
+.eff{color:var(--ink);margin-top:2px;font-size:.95rem}
+.thunder{color:var(--thunder);font-weight:700}.lightning{color:var(--lightning);font-weight:700}
+.force{color:var(--force);font-weight:700}.acid{color:var(--acid);font-weight:700}.psychic{color:var(--psychic);font-weight:700}
+.pierce{color:var(--pierce);font-weight:700}
+dl.turn{margin:0;display:grid;grid-template-columns:auto 1fr;gap:0;background:var(--panel);border:1px solid var(--line);border-radius:6px}
+dl.turn dt,dl.turn dd{margin:0;padding:9px 12px;border-top:1px solid var(--line)}
+dl.turn dt{font-weight:700;color:var(--brass);white-space:nowrap}
+dl.turn dt:first-of-type,dl.turn dd:first-of-type{border-top:0}
+ul{margin:0;padding-left:20px}
+li{margin-bottom:6px}
+.note{font-size:.9rem;color:var(--muted);margin-top:6px}
+/* tracker */
+.track{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 12px}
+.trow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.trow:first-child{border-top:0}
+.pips{display:flex;gap:7px;flex-wrap:wrap}
+.pip{width:26px;height:26px;border-radius:50%;border:2px solid var(--verd);background:var(--verd);cursor:pointer;padding:0}
+.pip[aria-pressed="true"]{background:none;border-color:var(--line)}
+.btn{border:1px solid var(--brass);background:none;color:var(--brass);font:700 .95rem "Alegreya Sans",sans-serif;padding:8px 14px;border-radius:6px;cursor:pointer}
+.btn.solid{background:var(--verd);border-color:var(--verd);color:var(--panel)}
+.btn:disabled{opacity:.4;cursor:default}
+.reset{margin-top:10px}
+
+/* hit points */
+.statlink{color:inherit;text-decoration:none}
+.statlink:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+.hpbox{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 12px}
+.hpwho{padding:10px 0;border-top:1px solid var(--line);display:grid;gap:8px}
+.hpwho:first-child{border-top:0}
+.hphead{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.hpread{font:800 1.15rem "Alegreya",Georgia,serif;font-variant-numeric:tabular-nums}
+.meter{position:relative;height:8px;border-radius:4px;background:var(--line);overflow:hidden;display:flex}
+.meter i{display:block;height:100%;background:var(--verd)}
+.meter i.low{background:var(--warn)}
+.meter i.tmp{background:var(--brass)}
+.hpfields{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.hpfields label{display:grid;gap:2px;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.hpbox input{width:100%;min-width:0;font:700 1.05rem "Alegreya Sans",sans-serif;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-variant-numeric:tabular-nums}
+.hpbox input:focus-visible{outline:3px solid var(--brass);outline-offset:1px}
+.hpact{display:grid;grid-template-columns:minmax(4.5em,1fr) auto auto auto;gap:6px}
+#homuHp .hpact{grid-template-columns:minmax(3.5em,.7fr) minmax(4.5em,1fr) auto auto}
+.hpmsg{margin:0;font-size:.9rem;color:var(--muted)}
+.hpmsg:empty{display:none}
+.hpmsg b{color:var(--warn)}
+@media (max-width:420px){ .hpact{grid-template-columns:1fr 1fr 1fr} .hpact input{grid-column:1/-1} #homuHp .hpact{grid-template-columns:1fr 1fr} }
+/* spell kinds */
+.lvl-c,.lvl-s{display:inline-block;font:700 .66rem/1.5 "Alegreya Sans",sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:0 6px;border-radius:3px;vertical-align:2px;margin-right:4px}
+.lvl-c{color:var(--verd);border:1px solid var(--verd)}
+.lvl-s{background:var(--brass);color:var(--panel);border:1px solid var(--brass)}
+.rows.cantrips{border-left:4px solid var(--verd)}
+.rows.leveled{border-left:4px solid var(--brass)}
+/* ongoing effects */
+.fxbox{display:grid;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--paper)}
+.fxbox .fxh{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.fx{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:start;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--verd);border-radius:6px;padding:6px 8px 7px 10px;font-size:.9rem}
+.fx.fx-acid{border-left-color:var(--acid)}
+.fxbox[hidden]{display:none}
+.fx .fxn{font-weight:700}
+.fx .fxn small{font-weight:400;color:var(--muted);margin-left:6px}
+.fx .fxt{grid-column:1/2}
+.fx button{grid-row:1/3;grid-column:2;border:1px solid var(--line);background:none;color:var(--muted);border-radius:4px;font:700 .78rem "Alegreya Sans",sans-serif;padding:3px 7px;cursor:pointer}
+.fx .roll-now{display:block;margin-top:3px;font-weight:700;color:var(--acid)}
+/* loadout */
+.loadout{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 12px;margin-bottom:6px}
+.lrow{display:grid;grid-template-columns:9.5em 1fr;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.lrow:first-child{border-top:0}
+.lrow .switch,.lrow .seg{margin:0}
+.llab{font-weight:700;font-size:.92rem}
+.llab .cnt{display:block;font-weight:400;font-size:.78rem;color:var(--muted)}
+.toggles{display:flex;flex-wrap:wrap;gap:6px}
+.toggles button{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:6px;padding:6px 10px;font:700 .88rem "Alegreya Sans",sans-serif;cursor:pointer}
+.toggles button[aria-pressed="true"]{background:var(--verd);border-color:var(--verd);color:var(--panel)}
+.toggles button:disabled{opacity:.4;cursor:not-allowed}
+.chip.on{background:var(--verd);color:var(--panel)}
+.chip.off{background:none;border:1px solid var(--line);color:var(--muted)}
+.row.inactive .name,.row.inactive .eff{opacity:.55}
+@media (max-width:420px){ .lrow{grid-template-columns:1fr;gap:4px} }
+/* ---------- turn simulator ---------- */
+.sim{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.simhead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.simhead .rnd{font:800 1.1rem "Alegreya",Georgia,serif}
+.simhead .meta{font-size:.85rem;color:var(--muted)}
+.conc{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;border:1px solid var(--brass);color:var(--brass);border-radius:4px;padding:1px 4px 1px 8px}
+.conc button{border:0;background:none;color:inherit;font:700 .8rem "Alegreya Sans",sans-serif;cursor:pointer;padding:2px 4px}
+.steps{display:flex;flex-wrap:wrap;gap:5px;padding:10px 12px;border-bottom:1px solid var(--line);list-style:none;margin:0}
+.steps li{margin:0}
+.steps button{display:flex;flex-direction:column;align-items:flex-start;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:6px;padding:4px 9px;cursor:pointer;font:700 .85rem/1.2 "Alegreya Sans",sans-serif;text-align:left}
+.steps button small{font-weight:400;font-size:.72rem;color:var(--muted);max-width:11em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.steps button.done{border-color:var(--verd)}
+.steps button.done small{color:var(--verd)}
+.steps button[aria-current="step"]{background:var(--verd);border-color:var(--verd);color:var(--panel)}
+.steps button[aria-current="step"] small{color:var(--panel)}
+.panel{padding:12px}
+.panel h3{margin:0 0 8px;color:var(--ink)}
+.panel .hint{font-size:.9rem;color:var(--muted);margin:-4px 0 10px}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.opt{position:relative;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:6px;padding:7px 9px;text-align:left;cursor:pointer;font:inherit;display:flex;flex-direction:column;gap:2px}
+.opt b{font-weight:700;font-size:.95rem}
+.opt span{font-size:.74rem;color:var(--muted)}
+.opt[aria-pressed="true"]{border-color:var(--verd);background:var(--verd-soft);box-shadow:inset 0 0 0 1px var(--verd)}
+.opt:disabled{opacity:.55;cursor:not-allowed}
+.opt:disabled b{opacity:.7}
+.opt .whyin{color:var(--warn)}
+.opt.cantrip{border-left:4px solid var(--verd)}
+.opt.spell{border-left:4px solid var(--brass)}
+.opt.cantrip b,.opt.spell b{padding-right:3.6em}
+.opt em{position:absolute;top:7px;right:7px;font:700 .64rem/1.5 "Alegreya Sans",sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:0 5px;border-radius:3px}
+.opt.cantrip em{color:var(--verd);border:1px solid var(--verd)}
+.opt.spell em{background:var(--brass);color:var(--panel)}
+.ogrp{grid-column:1/-1;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.ogrp:first-child{margin-top:0}
+.card{margin-top:12px;border-top:2px solid var(--brass);padding-top:10px}
+.card h4{font:800 1.1rem "Alegreya",Georgia,serif;margin:0 0 8px}
+.seg{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 10px}
+.seg button{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:4px 11px;font:700 .82rem "Alegreya Sans",sans-serif;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--brass);border-color:var(--brass);color:var(--panel)}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
+dl.roll{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:0;align-items:baseline}
+dl.roll dt{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+dl.roll dd{margin:0}
+.dice{font:800 1.2rem/1.2 "Alegreya",Georgia,serif;font-variant-numeric:tabular-nums}
+.vs{color:var(--muted);font-size:.9rem}
+.card ul{margin-top:10px;font-size:.92rem}
+.card li{margin-bottom:4px}
+.warn{color:var(--warn);font-weight:700}
+.why{font-size:.85rem;color:var(--warn);margin-top:8px}
+.nav{display:flex;justify-content:space-between;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.summary{margin:0;padding:0;list-style:none}
+.summary li{display:grid;grid-template-columns:8.5em 1fr;gap:10px;padding:6px 0;border-top:1px solid var(--line);margin:0}
+.summary li:first-child{border-top:0}
+.summary .k{font-weight:700;color:var(--brass)}
+.summary .v small{color:var(--muted)}
+@media (max-width:420px){ .stat b{font-size:1.15rem} dl.turn{grid-template-columns:1fr} dl.turn dt{padding-bottom:0} dl.turn dd{border-top:0;padding-top:2px}
+  .summary li{grid-template-columns:1fr;gap:0} dl.roll{grid-template-columns:1fr;gap:0} dl.roll dd{margin-bottom:8px} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<main>
+  <h1>Sol Starglance</h1>
+  <p class="sub">Qualinesti high elf, artificer 5 (Armorer)</p>
+
+  <div class="stats">
+    <div class="stat"><b id="ac">18</b><span>AC</span></div>
+    <a class="stat statlink" href="#hp"><b id="hpStat">38</b><span>HP</span></a>
+    <div class="stat"><b id="spd">30</b><span>Speed ft</span></div>
+    <div class="stat"><b>+2</b><span>Initiative</span></div>
+    <div class="stat"><b>16</b><span>Spell DC</span></div>
+    <div class="stat"><b>+8</b><span>Spell attack</span></div>
+    <div class="stat"><b>+3</b><span>Proficiency</span></div>
+    <div class="stat"><b>14</b><span>Passive Perc.</span></div>
+  </div>
+
+  <h2 id="hp">Hit points</h2>
+  <div class="hpbox">
+    <div class="hpwho">
+      <div class="hphead"><b>Sol</b> <span class="hpread" id="hpRead"></span></div>
+      <div class="meter" aria-hidden="true"><i id="hpBar"></i><i class="tmp" id="hpTmpBar"></i></div>
+      <div class="hpfields">
+        <label for="hpCur">Current<input id="hpCur" type="number" inputmode="numeric" min="0"></label>
+        <label for="hpMax">Max<input id="hpMax" type="number" inputmode="numeric" min="1"></label>
+        <label for="hpTemp">Temp<input id="hpTemp" type="number" inputmode="numeric" min="0"></label>
+      </div>
+      <div class="hpact">
+        <input id="hpAmt" type="number" inputmode="numeric" min="0" placeholder="Amount" aria-label="Damage or healing amount">
+        <button type="button" class="btn" id="hpDmg">Damage</button>
+        <button type="button" class="btn" id="hpHeal">Heal</button>
+        <button type="button" class="btn" id="hpTmpSet">Set temp</button>
+      </div>
+      <p class="hpmsg" id="hpMsg" aria-live="polite"></p>
+    </div>
+    <div class="hpwho" id="homuHp">
+      <div class="hphead"><b>Homunculus</b> <span class="hpread" id="hhRead"></span></div>
+      <div class="meter" aria-hidden="true"><i id="hhBar"></i></div>
+      <div class="hpact">
+        <input id="hhCur" type="number" inputmode="numeric" min="0" aria-label="Homunculus current HP">
+        <input id="hhAmt" type="number" inputmode="numeric" min="0" placeholder="Amount" aria-label="Homunculus damage or healing amount">
+        <button type="button" class="btn" id="hhDmg">Damage</button>
+        <button type="button" class="btn" id="hhHeal">Heal</button>
+      </div>
+      <p class="hpmsg" id="hhMsg" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <h2>Loadout</h2>
+  <div class="loadout">
+    <div class="lrow"><span class="llab">Armor model</span>
+      <div class="switch" role="group" aria-label="Armor model">
+        <button type="button" data-m="g" aria-pressed="true">Guardian (melee)</button>
+        <button type="button" data-m="i" aria-pressed="false">Infiltrator (ranged)</button>
+      </div></div>
+    <div class="lrow"><span class="llab">Active infusions <span class="cnt" id="infCount"></span></span>
+      <div class="toggles" id="infToggles" role="group" aria-label="Active infusions"></div></div>
+    <div class="lrow" id="ewRow"><span class="llab">Enhanced Weapon is on</span>
+      <div class="seg" id="ewSeg" role="group" aria-label="Enhanced Weapon target"></div></div>
+    <div class="lrow"><span class="llab">Shield</span>
+      <div class="seg" id="shSeg" role="group" aria-label="Shield"></div></div>
+  </div>
+  <p class="note">Everything below follows these settings: AC, attack and damage numbers, the turn options, the simulator and the tracker. Model and infusions change at the end of a short or long rest (model) or long rest (infusions).</p>
+
+  <div class="model" id="m-g"></div>
+  <div class="model" id="m-i" hidden></div>
+  <p class="note">Armor is your spellcasting focus and can't be removed against your will. Switching model needs smith's tools in hand.</p>
+
+  <h2>On your turn</h2>
+  <dl class="turn" id="turnList"></dl>
+  <p class="note">Extra Attack only works with the Attack action; you can't swing twice and cast a leveled spell in the same turn.</p>
+
+  <h2 id="sim">Turn simulator</h2>
+  <div class="sim">
+    <div class="simhead">
+      <div><span class="rnd" id="simRound">Round 1</span> <span class="meta" id="simModel"></span></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span id="simConc"></span>
+        <button type="button" class="btn" id="simNew">New turn</button>
+      </div>
+    </div>
+    <div class="fxbox" id="simFx" aria-live="polite" hidden></div>
+    <ol class="steps" id="simSteps" aria-label="Turn slots"></ol>
+    <div class="panel" id="simPanel" aria-live="polite"></div>
+    <div class="nav">
+      <button type="button" class="btn" id="simBack">Back</button>
+      <button type="button" class="btn solid" id="simNext">Next</button>
+    </div>
+  </div>
+  <p class="note">Pick one option per slot, roll what the card says. Spell slots and uses you pick are marked in the tracker when you end the turn. Uses the armor model selected above.</p>
+
+  <h2>Spells</h2>
+  <p class="note">Slots: 4 × 1st, 2 × 2nd. Save DC 16, spell attack +8. <span class="chip c">C</span> = concentration (one at a time).</p>
+
+  <h3><span class="lvl-c">Cantrip</span> Cantrips (at will, no slot)</h3>
+  <div class="rows cantrips">
+    <div class="row"><span class="name">Mind Sliver</span><span class="chips"><span class="chip">Action</span><span class="chip">60 ft</span><span class="chip">INT save</span></span>
+      <div class="eff"><span class="psychic">2d6 psychic</span>; on fail, target subtracts 1d4 from its next save before the end of your next turn.</div></div>
+    <div class="row"><span class="name">Mage Hand</span><span class="chips"><span class="chip">Action</span><span class="chip">30 ft</span></span>
+      <div class="eff">Spectral hand, 1 min, carries ≤10 lb. Action each time you use it. Can't attack or use magic items.</div></div>
+    <div class="row"><span class="name">Mending</span><span class="chips"><span class="chip">1 min</span><span class="chip">Touch</span></span>
+      <div class="eff">Fixes a single break or tear up to 1 ft.</div></div>
+  </div>
+
+  <h3><span class="lvl-s">1st</span> 1st-level spells (use a slot)</h3>
+  <div class="rows leveled">
+    <div class="row"><span class="name">Magic Missile</span><span class="chips"><span class="chip">Action</span><span class="chip">120 ft</span><span class="chip">Auto-hit</span></span>
+      <div class="eff">3 darts × <span class="force">1d4+1 force</span>, split as you like. +1 dart per slot level above 1st.</div></div>
+    <div class="row"><span class="name">Thunderwave</span><span class="chips"><span class="chip">Action</span><span class="chip">15 ft cube from you</span><span class="chip">CON save</span></span>
+      <div class="eff"><span class="thunder">2d8 thunder</span> + push 10 ft; half, no push on save. Heard 300 ft away. +1d8 per slot above.</div></div>
+    <div class="row"><span class="name">Tasha's Caustic Brew</span> <span class="chip c">C</span><span class="chips"><span class="chip">Action</span><span class="chip">30×5 ft line</span><span class="chip">DEX save</span></span>
+      <div class="eff"><span class="acid">2d4 acid</span> at the start of each of their turns until someone uses an action to scrape it off. +2d4 per slot above.</div></div>
+    <div class="row"><span class="name">Faerie Fire</span> <span class="chip c">C</span><span class="chips"><span class="chip">Action</span><span class="chip">60 ft, 20 ft cube</span><span class="chip">DEX save</span></span>
+      <div class="eff">Outlined creatures: attacks against them have advantage, can't be invisible. 1 min.</div></div>
+    <div class="row"><span class="name">Grease</span><span class="chips"><span class="chip">Action</span><span class="chip">60 ft, 10 ft square</span><span class="chip">DEX save</span></span>
+      <div class="eff">Fall prone on fail (also when entering or ending turn there). Difficult terrain, 1 min, no concentration.</div></div>
+    <div class="row"><span class="name">Command</span><span class="chips"><span class="chip">Action</span><span class="chip">60 ft</span><span class="chip">WIS save</span></span>
+      <div class="eff">One word for their next turn: approach, drop, flee, grovel, halt. Not vs. undead. 1 free cast per long rest (Fey Touched).</div></div>
+    <div class="row"><span class="name">Sanctuary</span><span class="chips"><span class="chip">Bonus</span><span class="chip">30 ft</span></span>
+      <div class="eff">Attackers must pass a WIS save or pick another target. Ends if the warded creature attacks or casts at an enemy. Doesn't stop area damage.</div></div>
+    <div class="row"><span class="name">Absorb Elements</span><span class="chips"><span class="chip">Reaction</span><span class="chip">Self</span></span>
+      <div class="eff">When hit by acid/cold/fire/lightning/thunder: resistance to it until your next turn; first melee hit next turn +1d6 of that type.</div></div>
+    <div class="row"><span class="name">Feather Fall</span><span class="chips"><span class="chip">Reaction</span><span class="chip">60 ft</span></span>
+      <div class="eff">Up to 5 falling creatures drop 60 ft/round, no fall damage.</div></div>
+    <div class="row"><span class="name">Detect Magic</span> <span class="chip c">C</span><span class="chips"><span class="chip">Ritual</span><span class="chip">Sense 30 ft</span></span>
+      <div class="eff">See magic auras and their school, 10 min.</div></div>
+    <div class="row"><span class="name">Identify</span><span class="chips"><span class="chip">Ritual</span><span class="chip">Touch</span></span>
+      <div class="eff">Learn an item's properties and how to use it. Needs a 100 gp pearl.</div></div>
+  </div>
+
+  <h3><span class="lvl-s">2nd</span> 2nd-level spells (use a 2nd-level slot)</h3>
+  <div class="rows leveled">
+    <div class="row"><span class="name">Shatter</span><span class="chips"><span class="chip">Action</span><span class="chip">60 ft, 10 ft radius</span><span class="chip">CON save</span></span>
+      <div class="eff"><span class="thunder">3d8 thunder</span>, half on save. Stone/metal creatures save at disadvantage. Heard 100 ft away.</div></div>
+    <div class="row"><span class="name">Mirror Image</span><span class="chips"><span class="chip">Action</span><span class="chip">Self</span></span>
+      <div class="eff">3 duplicates, 1 min, no concentration. When attacked roll d20: 6+ (3 left), 8+ (2), 11+ (1) and the hit goes to a duplicate (AC 12, 1 hit pops it).</div></div>
+    <div class="row"><span class="name">Misty Step</span><span class="chips"><span class="chip">Bonus</span><span class="chip">Teleport 30 ft</span></span>
+      <div class="eff">To a spot you can see. 1 free cast per long rest (Fey Touched).</div></div>
+  </div>
+
+  <div id="homuSec">
+  <h2>Homunculus servant</h2>
+  <div class="rows">
+    <div class="row"><span class="name">Stats</span><div class="eff">HP 11 (1 + INT 5 + level 5), AC 13, walk 20 ft, fly 30 ft. DEX save +5, Stealth +5, Perception +6 (passive 16), darkvision 60 ft. Evasion; immune to poison. Shares your initiative and takes its turn right after yours. <i>Mending</i> heals it 2d6.</div></div>
+    <div class="row"><span class="name">Force Strike</span><span class="chips"><span class="chip">Your bonus action</span><span class="chip">30 ft</span><span class="chip">+8</span></span>
+      <div class="eff"><span class="force">1d4+3 force</span>. If you don't command it, it just Dodges.</div></div>
+    <div class="row"><span class="name">Channel Magic</span><span class="chips"><span class="chip">Its reaction</span><span class="chip">120 ft</span></span>
+      <div class="eff">Delivers a touch-range spell you cast through it.</div></div>
+  </div>
+  </div>
+
+  <h2>Infusions (4 known, 2 active)</h2>
+  <div class="rows" id="infList"></div>
+
+  <h2>Utility</h2>
+  <ul>
+    <li><b>Magical Tinkering</b> (action, touch tiny object): dim light 5 ft, a 6-second recorded message, an odor or sound, or a static image. Max 5 at once.</li>
+    <li><b>Right Tool for the Job:</b> 1 hour with thieves' or artisan's tools makes one set of artisan's tools.</li>
+    <li><b>Elf:</b> advantage vs. charm, immune to magical sleep, 4-hour trance.</li>
+  </ul>
+
+  <h2>Combos and gotchas</h2>
+  <ul>
+    <li><b>Mind Sliver, then a save spell next turn</b> (Command, Grease, Shatter): the −1d4 lasts until the end of your next turn. Also sets up Virion's and Zephyra's saves.</li>
+    <li><b>Faerie Fire</b> before the party's attack round gives everyone advantage.</li>
+    <li><b>Bonus action spell rule:</b> cast Misty Step or Sanctuary and your only other spell that turn can be a 1-action cantrip.</li>
+    <li><b>Concentration:</b> Caustic Brew, Faerie Fire and Detect Magic can't run together. Damage forces a CON save (+5), DC 10 or half the damage.</li>
+    <li><b>Light crossbow</b> has Loading: only one shot per turn even with Extra Attack. Use the launcher instead.</li>
+    <li><b>Ritual Caster</b> spells (Detect Magic, Identify) are ritual-only (+10 min) unless you also prepare them as artificer spells.</li>
+    <li><b>Prepared:</b> you can prepare 7 (INT +5, half level 2); the sheet shows 6, so one slot is open (Alarm?).</li>
+    <li id="acNote"></li>
+  </ul>
+
+  <h2>Tracker</h2>
+  <div class="track" id="track"></div>
+  <button type="button" class="btn reset" id="reset">Long rest: reset all</button>
+  <p class="note">Tap a pip to mark it used. Long rest also restores HP and clears temp HP. It doesn't refill Mind Sharpener: it regains 1d4 charges at dawn, so tap those back yourself. Saved on this device only.</p>
+</main>
+<script>
+(function(){
+  var KEY="sol-sheet-v1", state={};
+  try{ state=JSON.parse(localStorage.getItem(KEY)||"{}")||{}; }catch(e){ state={}; }
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
+  state.used=state.used||{};
+  state.round=state.round||1;
+
+  // ---------- loadout ----------
+  var INF=[
+    {id:"ed",name:"Enhanced Defense",desc:"+1 AC on your armor or shield."},
+    {id:"ew",name:"Enhanced Weapon",desc:"+1 to attack and damage rolls with one weapon."},
+    {id:"hs",name:"Homunculus Servant",desc:"Tiny construct companion. Force Strike on your bonus action; Channel Magic for touch spells."},
+    {id:"ms",name:"Mind Sharpener",desc:"On your armor. 4 charges; reaction when you fail a concentration save to succeed instead. Regains 1d4 at dawn."}
+  ];
+  var INF_MAX=2;
+  if(!Array.isArray(state.inf)) state.inf=["hs"];
+  if(!state.ew) state.ew="g";
+  if(typeof state.shield!=="boolean") state.shield=true;
+  function on(id){ return state.inf.indexOf(id)>=0; }
+  function HS(){ return on("hs"); }
+  function MSH(){ return on("ms"); }
+  function AC(){ return 14+2+(state.shield?2:0)+(on("ed")?1:0); }
+  var WBASE={g:{name:"Thunder Gauntlets",atk:8,dmg:5,n:1,die:"d8",type:"thunder"},
+             i:{name:"Lightning Launcher",atk:8,dmg:5,n:1,die:"d6",type:"lightning"},
+             s:{name:"Shortsword",atk:5,dmg:2,n:1,die:"d6",type:"piercing"}};
+  var WCLS={thunder:"thunder",lightning:"lightning",piercing:"pierce"};
+  function W(k){ var b=WBASE[k], p=(on("ew")&&state.ew===k)?1:0;
+    return {name:b.name,atk:b.atk+p,dmg:b.dmg+p,die:b.die,type:b.type,cls:WCLS[b.type],plus:p}; }
+  function sg(n){ return (n>=0?"+":"−")+Math.abs(n); }
+  function e_(t){ return String(t).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+  var btns=document.querySelectorAll(".switch button");
+  function setModel(m){ state.model=m; save(); refresh(); }
+  btns.forEach(function(b){ b.addEventListener("click", function(){ setModel(b.dataset.m); }); });
+
+  function renderLoadout(){
+    var m=state.model==="i"?"i":"g";
+    btns.forEach(function(b){ b.setAttribute("aria-pressed", b.dataset.m===m ? "true":"false"); });
+    document.getElementById("m-g").hidden = m!=="g";
+    document.getElementById("m-i").hidden = m!=="i";
+    document.getElementById("spd").textContent = m==="i" ? "35" : "30";
+    document.getElementById("ac").textContent = AC();
+
+    // infusion toggles
+    var full=state.inf.length>=INF_MAX, tg=document.getElementById("infToggles"); tg.innerHTML="";
+    INF.forEach(function(f){
+      var b=document.createElement("button"); b.type="button"; b.textContent=f.name;
+      var act=on(f.id); b.setAttribute("aria-pressed",act?"true":"false");
+      if(!act&&full){ b.disabled=true; b.title="Two infusions already active. Turn one off first."; }
+      b.onclick=function(){ if(on(f.id)) state.inf=state.inf.filter(function(x){ return x!==f.id; }); else if(state.inf.length<INF_MAX) state.inf.push(f.id); save(); refresh(); };
+      tg.appendChild(b);
+    });
+    document.getElementById("infCount").textContent=state.inf.length+" of "+INF_MAX+" active";
+
+    var ewRow=document.getElementById("ewRow"); ewRow.hidden=!on("ew");
+    var ewSeg=document.getElementById("ewSeg"); ewSeg.innerHTML="";
+    [["g","Gauntlets"],["i","Launcher"],["s","Shortsword"]].forEach(function(o){
+      var b=document.createElement("button"); b.type="button"; b.textContent=o[1];
+      b.setAttribute("aria-pressed",state.ew===o[0]?"true":"false");
+      b.onclick=function(){ state.ew=o[0]; save(); refresh(); }; ewSeg.appendChild(b);
+    });
+    var shSeg=document.getElementById("shSeg"); shSeg.innerHTML="";
+    [[true,"Carried (+2 AC)"],[false,"None"]].forEach(function(o){
+      var b=document.createElement("button"); b.type="button"; b.textContent=o[1];
+      b.setAttribute("aria-pressed",state.shield===o[0]?"true":"false");
+      b.onclick=function(){ state.shield=o[0]; save(); refresh(); }; shSeg.appendChild(b);
+    });
+
+    // model panels
+    var g=W("g"), i=W("i"), sw=W("s");
+    var ewTag=function(w){ return w.plus?'<span class="chip on">Enhanced +1</span>':""; };
+    document.getElementById("m-g").innerHTML=
+      '<div class="weapon"><span class="name big">Thunder Gauntlets</span> <span class="chips"><span class="chip">Melee 5 ft</span><span class="chip">'+sg(g.atk)+'</span>'+ewTag(g)+'</span></div>'+
+      '<p><span class="thunder">1d8'+sg(g.dmg)+' thunder</span>, two attacks per Attack action (≈'+Math.round(2*(4.5+g.dmg))+' dmg if both hit).</p>'+
+      '<p>On hit: target has <b>disadvantage attacking anyone but you</b> until the start of your next turn.</p>'+
+      '<p><b>Defensive Field</b> (bonus action): gain 5 temp HP, replaces current temp HP. 3 uses per long rest.</p>'+
+      '<p class="note">Use when you\'re the one standing between an enemy and your squishier friends. Gauntlet hand must be empty'+(state.shield?"; shield stays in the other.":".")+'</p>';
+    document.getElementById("m-i").innerHTML=
+      '<div class="weapon"><span class="name big">Lightning Launcher</span> <span class="chips"><span class="chip">Range 90/300 ft</span><span class="chip">'+sg(i.atk)+'</span>'+ewTag(i)+'</span></div>'+
+      '<p><span class="lightning">1d6'+sg(i.dmg)+' lightning</span>, two attacks per Attack action; once per turn a hit adds <span class="lightning">+1d6</span> (≈'+Math.round(2*(3.5+i.dmg)+3.5)+' dmg if both hit).</p>'+
+      '<p><b>Powered Steps:</b> speed 35 ft. <b>Dampening Field:</b> advantage on Stealth, which cancels scale mail\'s disadvantage (roll normally).</p>'+
+      '<p class="note">Disadvantage if a hostile creature is within 5 ft of you, or beyond 90 ft. Shortsword for close range: '+sg(sw.atk)+', 1d6'+sg(sw.dmg)+' piercing'+(sw.plus?" (Enhanced)":"")+'; drawing it is your free object interaction.</p>';
+
+    // turn list
+    var bonus=["Defensive Field (Guardian)"]; if(HS()) bonus.push("command the homunculus"); bonus.push("Misty Step","Sanctuary");
+    var react=["Absorb Elements","Feather Fall"]; if(MSH()) react.push("Mind Sharpener"); react.push(m==="g"?"opportunity attack (gauntlet)":"opportunity attack (shortsword, if drawn)");
+    document.getElementById("turnList").innerHTML=
+      '<dt>Action</dt><dd>Attack (2 hits with '+(m==="g"?"gauntlets":"launcher")+'), <i>or</i> cast a spell / Mind Sliver, <i>or</i> Magical Tinkering, Dash, Dodge, Help.</dd>'+
+      '<dt>Bonus</dt><dd>'+bonus.join(", ")+'.</dd>'+
+      '<dt>Reaction</dt><dd>'+react.join(", ")+'.</dd>'+
+      '<dt>Move</dt><dd>'+(m==="i"?35:30)+' ft. Darkvision 60 ft.</dd>';
+
+    document.getElementById("homuSec").hidden=!HS();
+
+    var il=document.getElementById("infList"); il.innerHTML="";
+    INF.forEach(function(f){
+      var act=on(f.id), extra="";
+      if(f.id==="ew"&&act) extra=" Currently on: "+W(state.ew).name+".";
+      il.insertAdjacentHTML("beforeend",'<div class="row'+(act?"":" inactive")+'"><span class="name">'+e_(f.name)+'</span> <span class="chips"><span class="chip '+(act?"on":"off")+'">'+(act?"Active":"Known")+'</span></span><div class="eff">'+e_(f.desc+extra)+'</div></div>');
+    });
+
+    document.getElementById("acNote").innerHTML='<b>AC '+AC()+'</b> = scale mail 14 + DEX 2'+(state.shield?" + shield 2":"")+(on("ed")?" + Enhanced Defense 1":"")+'. The printed sheet says 18.';
+  }
+
+  // ---------- tracker ----------
+  var RES=[], MAX={};
+  function refreshRes(){
+    RES=[["s1","1st-level slots",4],["s2","2nd-level slots",2],["cmd","Free Command",1],["ms","Free Misty Step",1],["df","Defensive Field",3]];
+    if(MSH()) RES.push(["msc","Mind Sharpener charges",4]);
+    MAX={}; RES.forEach(function(r){ MAX[r[0]]=r[2]; });
+  }
+  var box=document.getElementById("track");
+  function renderTrack(){
+    box.innerHTML="";
+    RES.forEach(function(r){
+      var row=document.createElement("div"); row.className="trow";
+      var lab=document.createElement("span"); lab.textContent=r[1];
+      var pips=document.createElement("div"); pips.className="pips";
+      for(var i=0;i<r[2];i++){
+        var p=document.createElement("button"); p.type="button"; p.className="pip";
+        var used=(state.used[r[0]]||0)>i;
+        p.setAttribute("aria-pressed", used?"true":"false");
+        p.setAttribute("aria-label", r[1]+" "+(i+1)+(used?" used":" available"));
+        (function(id,idx){ p.addEventListener("click",function(){
+          var u=state.used[id]||0; state.used[id]= (idx<u) ? idx : idx+1; save(); renderTrack(); sim();
+        }); })(r[0],i);
+        pips.appendChild(p);
+      }
+      row.appendChild(lab); row.appendChild(pips); box.appendChild(row);
+    });
+  }
+  document.getElementById("reset").addEventListener("click",function(){ var k=state.used.msc; state.used={}; if(k) state.used.msc=k; state.hp.cur=state.hp.max; state.hp.temp=0; state.hhp=11; save(); renderTrack(); renderHP(); sim(); });
+  // ---------- hit points ----------
+  var HOMU_MAX=11; // 1 + INT 5 + artificer level 5
+  if(!state.hp||typeof state.hp.cur!=="number") state.hp={cur:38,max:38,temp:0};
+  if(typeof state.hhp!=="number") state.hhp=HOMU_MAX;
+  var $=function(id){ return document.getElementById(id); };
+  function num(v,def){ var n=parseInt(v,10); return isNaN(n)?def:n; }
+  function setVal(id,v){ var el=$(id); if(document.activeElement!==el) el.value=v; }
+  function renderHP(){
+    var h=state.hp, tot=Math.max(h.max,h.cur+h.temp);
+    $("hpStat").textContent=h.cur+(h.temp?"+"+h.temp:"")+"/"+h.max;
+    $("hpRead").textContent=h.cur+" / "+h.max+(h.temp?"  ·  "+h.temp+" temp":"");
+    var bar=$("hpBar"); bar.style.width=(100*h.cur/tot)+"%"; bar.className=h.cur<=h.max/4?"low":"";
+    $("hpTmpBar").style.width=(100*h.temp/tot)+"%";
+    setVal("hpCur",h.cur); setVal("hpMax",h.max); setVal("hpTemp",h.temp);
+    $("homuHp").hidden=!HS();
+    $("hhRead").textContent=state.hhp+" / "+HOMU_MAX;
+    var hb=$("hhBar"); hb.style.width=(100*state.hhp/HOMU_MAX)+"%"; hb.className=state.hhp<=HOMU_MAX/4?"low":"";
+    setVal("hhCur",state.hhp);
+  }
+  function hpSay(t){ $("hpMsg").innerHTML=t; }
+  function damage(n){
+    var h=state.hp, fromTemp=Math.min(h.temp,n), rest=n-fromTemp, parts=[];
+    h.temp-=fromTemp; h.cur=Math.max(0,h.cur-rest);
+    parts.push("Took "+n+(fromTemp?" ("+fromTemp+" from temp HP)":"")+".");
+    if(state.conc) parts.push("<b>Concentration on "+e_(state.conc)+":</b> roll d20 + 5 vs DC "+Math.max(10,Math.floor(n/2))+"."+(MSH()?" Fail? Mind Sharpener can turn it into a success.":""));
+    if(h.cur===0){ parts.push("<b>0 HP:</b> unconscious, making death saves."+(state.conc?" Concentration ends.":"")); dropConc(); }
+    hpSay(parts.join(" "));
+  }
+  $("hpDmg").onclick=function(){ var n=num($("hpAmt").value,0); if(n<=0) return; damage(n); $("hpAmt").value=""; save(); renderHP(); sim(); };
+  $("hpHeal").onclick=function(){ var n=num($("hpAmt").value,0); if(n<=0) return; var was=state.hp.cur; state.hp.cur=Math.min(state.hp.max,state.hp.cur+n); hpSay("Healed "+(state.hp.cur-was)+"."); $("hpAmt").value=""; save(); renderHP(); };
+  $("hpTmpSet").onclick=function(){ var n=num($("hpAmt").value,-1); if(n<0) return; state.hp.temp=n; hpSay("Temp HP set to "+n+". Temp HP doesn't stack: a new source replaces the old one."); $("hpAmt").value=""; save(); renderHP(); };
+  $("hpCur").onchange=function(){ state.hp.cur=Math.max(0,Math.min(state.hp.max,num(this.value,state.hp.cur))); save(); renderHP(); };
+  $("hpMax").onchange=function(){ state.hp.max=Math.max(1,num(this.value,state.hp.max)); state.hp.cur=Math.min(state.hp.cur,state.hp.max); save(); renderHP(); };
+  $("hpTemp").onchange=function(){ state.hp.temp=Math.max(0,num(this.value,state.hp.temp)); save(); renderHP(); };
+  $("hhCur").onchange=function(){ state.hhp=Math.max(0,Math.min(HOMU_MAX,num(this.value,state.hhp))); save(); renderHP(); };
+  $("hhDmg").onclick=function(){ var n=num($("hhAmt").value,0); if(n<=0) return; state.hhp=Math.max(0,state.hhp-n); $("hhMsg").textContent=state.hhp===0?"At 0 HP it dies and vanishes, leaving its heart gem behind. Re-infuse it on a long rest.":"Took "+n+"."; $("hhAmt").value=""; save(); renderHP(); };
+  $("hhHeal").onclick=function(){ var n=num($("hhAmt").value,0); if(n<=0) return; state.hhp=Math.min(HOMU_MAX,state.hhp+n); $("hhMsg").textContent="Healed. Casting Mending on it restores 2d6."; $("hhAmt").value=""; save(); renderHP(); };
+
+  function refresh(){ refreshRes(); renderLoadout(); renderTrack(); renderHP(); sim(); }
+
+  // ---------- turn simulator ----------
+  function M(){ return state.model==="i" ? "i" : "g"; }
+  function S(){ return M()==="i" ? 35 : 30; }
+  function d(t,c){ return '<span class="dice'+(c?' '+c:'')+'">'+t+'</span>'; }
+  function vs(t){ return ' <span class="vs">vs</span> <b>'+t+'</b>'; }
+  function save_(ab){ return [["Target rolls", d("d20 + its "+ab+" save")+vs("your DC 16")]]; }
+  var LVNAME={free:"Free cast",1:"1st-level slot",2:"2nd-level slot"};
+
+  var turn={}, out={}, cur=0, msg="";
+
+  // Options per slot. Each: id, name, tags, lv (slot choices), free (free-cast key), fixed (resource key),
+  // spell, leveled, conc, outcome (hit/miss tracking), card(lv) -> {rows:[[label,html]], notes:[]}
+  function attackCard(slot){
+    var w=W(M()), rows=[["Roll", d("d20 + "+w.atk)+vs("target's AC")]], notes=[];
+    if(w.plus) notes.push("Includes +1 from Enhanced Weapon.");
+    if(M()==="g"){
+      rows.push(["Hit", '<span class="thunder">'+d("1d8 + "+w.dmg)+' thunder</span>']);
+      rows.push(["Crit (nat 20)", '<span class="thunder">'+d("2d8 + "+w.dmg)+' thunder</span>']);
+      rows.push(["On hit", "Target has disadvantage on attacks against anyone but you until the start of your next turn."]);
+      notes.push("Melee 5 ft. Gauntlet hand must be empty.");
+      notes.push("Advantage if the target is prone (Grease, Shove) or outlined by Faerie Fire.");
+    }else{
+      var bonus;
+      if(slot==="atk2"){
+        var o=out.atk1;
+        bonus = (o==="hit"||o==="crit") ? "no" : (o==="miss" ? "yes" : "maybe");
+      }else bonus="yes";
+      var extra = bonus==="no" ? "" : ' + 1d6';
+      var extraC = bonus==="no" ? "" : ' + 2d6';
+      rows.push(["Hit", '<span class="lightning">'+d("1d6"+extra+" + "+w.dmg)+' lightning</span>']);
+      rows.push(["Crit (nat 20)", '<span class="lightning">'+d("2d6"+extraC+" + "+w.dmg)+' lightning</span>']);
+      if(bonus==="yes" && slot==="atk1") notes.push("The extra 1d6 applies to your first hit this turn only. If this misses, it carries to the Extra Attack.");
+      if(bonus==="maybe") notes.push("Add the extra 1d6 only if Attack 1 missed (mark Attack 1 hit or miss to update this).");
+      if(bonus==="no") notes.push("Extra 1d6 already used on Attack 1.");
+      rows.push(["Disadvantage if", "A hostile creature is within 5 ft of you, or the target is 91–300 ft away."]);
+      notes.push("Advantage if the target is outlined by Faerie Fire. Prone targets impose disadvantage on ranged attacks.");
+    }
+    return {rows:rows,notes:notes};
+  }
+  var grapple={id:"grapple",name:"Grapple / Shove",tags:["replaces this attack"],card:function(){ return {
+    rows:[["You roll", d("d20 − 1")+' <span class="vs">(Athletics)</span>'+vs("target's Athletics or Acrobatics (its pick)")],
+      ["Grapple wins","Target grappled: speed 0. Needs a free hand."],
+      ["Shove wins","Knock it prone, or push it 5 ft away."]],
+    notes:["Athletics −1 makes this a long shot. Leave grappling to Malakai.","Target can be at most one size larger than you.", M()==="g"?"Shove prone first: your next gauntlet attack gets advantage.":"Don't shove prone in Infiltrator: your ranged attacks against prone targets have disadvantage."]}; }};
+
+  var sword={id:"sword",name:"Shortsword",tags:["melee"],outcome:true,card:function(){ var w=W("s"); return {
+    rows:[["Roll", d("d20 + "+w.atk)+vs("target's AC")],["Hit",'<span class="pierce">'+d("1d6 + "+w.dmg)+" piercing</span>"],["Crit (nat 20)",'<span class="pierce">'+d("2d6 + "+w.dmg)+" piercing</span>"]],
+    notes:(w.plus?["Includes +1 from Enhanced Weapon."]:[]).concat(["Use it when an enemy is in your face: the launcher has disadvantage within 5 ft, the sword doesn't.","Drawing it is your free object interaction. No launcher +1d6 on sword hits."])}; }};
+  function atkOpts(slot){ var a=[{id:"strike",name:M()==="g"?"Gauntlet strike":"Launcher shot",tags:[sg(W(M()).atk)],outcome:true,card:function(){ return attackCard(slot); }}];
+    sword.tags=[sg(W("s").atk),"melee"];
+    if(M()==="i") a.push(sword); a.push(grapple); return a; }
+  var OPTS={
+    move:function(){ return [
+      {id:"move",name:"Move",tags:["up to "+S()+" ft"],card:function(){ return {rows:[["Distance", d(S()+" ft")+(turn.action&&turn.action.id==="dash"?' <span class="vs">+ '+S()+' ft from Dash</span>':"")]],notes:[
+        "Split movement before and after your action freely.",
+        "Difficult terrain (Grease, rubble) costs 2 ft per ft.",
+        "Leaving a hostile's reach provokes an opportunity attack unless you Disengage.",
+        M()==="g"?"Guardian: end next to the enemy you want to lock down.":"Infiltrator: end more than 5 ft from every hostile or your shots have disadvantage."]}; }},
+      {id:"stand",name:"Stand up",tags:["costs "+(S()/2)+" ft"],card:function(){ return {rows:[["Cost", d(S()/2+" ft")+' <span class="vs">then '+(S()/2)+" ft left to move</span>"]],notes:["Crawling instead costs 2 ft per ft while prone."]}; }},
+      {id:"hold",name:"Stay put",tags:["no movement"],card:function(){ return {rows:[["Roll","None"]],notes:["You still get one free object interaction (draw, stow, open a door)."]}; }}
+    ]; },
+    action:function(){ return [
+      {id:"attack",name:"Attack",tags:["2 attacks", M()==="g"?"gauntlet":"launcher"],card:function(){ return {rows:[["Attacks", d("2")+' <span class="vs">Attack 1 + Extra Attack, rolled separately</span>'],["Weapon", M()==="g"?"Thunder Gauntlets, melee 5 ft":"Lightning Launcher, 90/300 ft"]],notes:["Next steps walk you through each attack."]}; }},
+      {id:"sliver",name:"Mind Sliver",tags:["cantrip","INT save"],spell:true,card:function(){ return {rows:save_("INT").concat([["Fail",'<span class="psychic">'+d("2d6")+" psychic</span>, and it subtracts "+d("1d4")+" from its next save before the end of your next turn."],["Success","Nothing."]]),notes:["60 ft. Cantrip, so it works with Misty Step or Sanctuary as your bonus action.","Follow up with Command, Grease or Shatter while the −1d4 is live."]}; }},
+      {id:"mm",name:"Magic Missile",tags:["auto-hit","120 ft"],lv:[1,2],spell:true,leveled:true,card:function(lv){ var n=lv+2; return {rows:[["Roll","No attack roll: every dart hits."],["Damage",'<span class="force">'+d(n+" × (1d4 + 1)")+" force</span>"]],notes:["Split "+n+" darts among targets you can see within 120 ft.","Shield spell blocks all darts."]}; }},
+      {id:"tw",name:"Thunderwave",tags:["15 ft cube","CON save"],lv:[1,2],spell:true,leveled:true,card:function(lv){ var n=lv+1; return {rows:[["Each creature", d("d20 + its CON save")+vs("your DC 16")],["Fail",'<span class="thunder">'+d(n+"d8")+" thunder</span> and pushed 10 ft away from you."],["Success","Half damage, no push."]],notes:["Cube starts at your space. Allies in it get hit too: watch for Malakai and bear-form Zephyra in melee.","Audible out to 300 ft."]}; }},
+      {id:"brew",name:"Caustic Brew",tags:["30×5 ft line","DEX save"],lv:[1,2],spell:true,leveled:true,conc:true,card:function(lv){ var n=lv*2; return {rows:[["Each creature", d("d20 + its DEX save")+vs("your DC 16")],["Fail","Covered in acid: takes "+'<span class="acid">'+d(n+"d4")+" acid</span> at the start of each of its turns."],["Success","Nothing."]],notes:["Lasts until a creature uses its action to scrape it off, or your concentration ends (1 min)."]}; }},
+      {id:"ff",name:"Faerie Fire",tags:["20 ft cube","DEX save"],lv:[1,2],spell:true,leveled:true,conc:true,card:function(){ return {rows:[["Each creature", d("d20 + its DEX save")+vs("your DC 16")],["Fail","Outlined for 1 min: attacks against it have advantage, it can't be invisible."],["Success","Nothing."]],notes:["Cast at 1st level; a higher slot adds nothing.","Cast before Malakai and Zephyra swing: advantage for both."]}; }},
+      {id:"grease",name:"Grease",tags:["10 ft square","DEX save"],lv:[1,2],spell:true,leveled:true,card:function(){ return {rows:[["Each creature", d("d20 + its DEX save")+vs("your DC 16")],["Fail","Falls prone."],["Later","Anyone entering the area or ending its turn there saves again."]],notes:["Difficult terrain for 1 min, no concentration.",M()==="g"?"Prone targets give your gauntlet attacks advantage.":"Prone targets give your launcher shots disadvantage."]}; }},
+      {id:"cmd",name:"Command",tags:["60 ft","WIS save"],lv:["free",1,2],free:"cmd",spell:true,leveled:true,card:function(lv){ var n=(lv==="free"?1:lv); return {rows:[["Targets", d(String(n))],["Each target", d("d20 + its WIS save")+vs("your DC 16")],["Fail","Follows your one-word command on its next turn: approach, drop, flee, grovel, halt."],["Success","Nothing."]],notes:["No effect on undead, creatures that don't understand your language, or a command that's directly harmful to it.","Extra targets must be within 30 ft of each other.","Grovel = prone for your allies."]}; }},
+      {id:"shatter",name:"Shatter",tags:["10 ft radius","CON save"],lv:[2],spell:true,leveled:true,card:function(){ return {rows:[["Each creature", d("d20 + its CON save")+vs("your DC 16")],["Fail",'<span class="thunder">'+d("3d8")+" thunder</span>"],["Success","Half damage."]],notes:["Stone, metal or crystal creatures save with disadvantage.","60 ft range. Heard 100 ft away."]}; }},
+      {id:"mirror",name:"Mirror Image",tags:["self","2nd level"],lv:[2],spell:true,leveled:true,card:function(){ return {rows:[["Now","No roll. 3 duplicates for 1 min."],["When attacked", d("d20")+' <span class="vs">3 left: 6+ · 2 left: 8+ · 1 left: 11+</span>'],["On success","The attack targets a duplicate (AC 12); a hit destroys it."]],notes:["No concentration. Doesn't help against area spells or attackers with blindsight/truesight."]}; }},
+      {id:"hand",name:"Mage Hand",tags:["cantrip","30 ft"],spell:true,card:function(){ return {rows:[["Roll","None."]],notes:["Manipulate an object or open an unlocked door. Carries up to 10 lb, can't attack."]}; }},
+      {id:"tinker",name:"Magical Tinkering",tags:["touch"],card:function(){ return {rows:[["Roll","None."]],notes:["Tiny object: light, recorded message, sound/odor, or static image. Max 5 at once."]}; }},
+      {id:"dash",name:"Dash",tags:["+"+S()+" ft"],card:function(){ return {rows:[["Movement", d("+"+S()+" ft")+' <span class="vs">'+(S()*2)+" ft total</span>"]],notes:[]}; }},
+      {id:"dodge",name:"Dodge",tags:["defense"],card:function(){ return {rows:[["Until your next turn","Attacks against you have disadvantage (if you see the attacker). Your DEX saves have advantage."]],notes:["Lost if you're incapacitated or your speed drops to 0."]}; }},
+      {id:"diseng",name:"Disengage",tags:["no OAs"],card:function(){ return {rows:[["This turn","Your movement doesn't provoke opportunity attacks."]],notes:[]}; }},
+      {id:"help",name:"Help",tags:["ally advantage"],card:function(){ return {rows:[["Effect","One ally gets advantage on its next attack against a creature within 5 ft of you, or on an ability check."]],notes:["Lasts until the start of your next turn.","Best on Malakai's next swing if he acts before you do again."]}; }},
+      {id:"hide",name:"Hide",tags:["Stealth"],card:function(){ return {rows:[["You roll", d(M()==="i"?"d20 + 5":"d20 + 5, disadvantage")+' <span class="vs">(Stealth)</span>'+vs("each enemy's passive Perception")]],notes:[M()==="i"?"Dampening Field advantage cancels scale mail's disadvantage: roll once.":"Scale mail gives disadvantage on Stealth in Guardian.","You need cover or heavy obscurement to try."]}; }},
+      {id:"ready",name:"Ready",tags:["uses reaction"],card:function(){ return {rows:[["Now","Name a trigger and the action you'll take."],["When it fires","Use your reaction to act."]],notes:["A readied spell uses its slot now and needs concentration until it goes off.","A readied Attack is only one attack (no Extra Attack)."]}; }}
+    ]; },
+    atk1:function(){ return atkOpts("atk1"); },
+    atk2:function(){ return atkOpts("atk2"); },
+    bonus:function(){ return [
+      HS()&&{id:"homu",name:"Command homunculus",tags:["it acts after you"],card:function(){ return {rows:[["Next","Pick its action in the Homunculus step."]],notes:["Without a command it only takes the Dodge action."]}; }},
+      {id:"df",name:"Defensive Field",tags:["Guardian","5 temp HP"],fixed:"df",guardOnly:true,card:function(){ return {rows:[["Roll","None."],["Gain", d("5 temp HP")]],notes:["Replaces any temp HP you have; doesn't stack.","Lasts until a long rest or used up."]}; }},
+      {id:"misty",name:"Misty Step",tags:["teleport 30 ft"],lv:["free",2],free:"ms",spell:true,leveled:true,card:function(){ return {rows:[["Roll","None."],["Effect","Teleport up to 30 ft to a spot you can see."]],notes:["Escapes grapples and doesn't provoke opportunity attacks.","Your action can only be a cantrip this turn."]}; }},
+      {id:"sanct",name:"Sanctuary",tags:["30 ft","WIS save"],lv:[1,2],spell:true,leveled:true,card:function(){ return {rows:[["Attackers roll", d("d20 + WIS save")+vs("your DC 16")],["Fail","Must pick a new target or lose the attack or harmful spell."]],notes:["1 min. Ends if the warded creature attacks, casts at an enemy, or deals damage.","Doesn't stop area effects. Your action can only be a cantrip this turn."]}; }},
+      {id:"none",name:"Nothing",tags:[],card:function(){ return {rows:[["Bonus action","Unused."]],notes:[(HS()?"Homunculus will Dodge. ":"")+(M()==="g"?"Consider Defensive Field if you're taking hits.":"")].filter(Boolean)}; }}
+    ]; },
+    homu:function(){
+      var cmd = turn.bonus && turn.bonus.id==="homu";
+      if(!cmd) return [{id:"dodge",name:"Dodge (default)",tags:["not commanded"],card:function(){ return {rows:[["Its turn","Moves (fly 30 ft) and Dodges: attacks against it have disadvantage and its DEX saves (+5) have advantage."],["Evasion","DEX save for half: success = no damage, fail = half."]],notes:["Use your bonus action on it to get Force Strike."]}; }}];
+      return [
+        {id:"strike",name:"Force Strike",tags:["30 ft","+8"],outcome:true,card:function(){ return {rows:[["Roll", d("d20 + 8")+vs("target's AC")],["Hit",'<span class="force">'+d("1d4 + 3")+" force</span>"],["Crit (nat 20)",'<span class="force">'+d("2d4 + 3")+" force</span>"]],notes:["Acts right after your turn. Fly 30 ft, AC 13, HP 11."]}; }},
+        {id:"help",name:"Help",tags:["ally advantage"],card:function(){ return {rows:[["Effect","An ally's next attack against a creature within 5 ft of the homunculus has advantage."]],notes:["Fly next to Malakai's or Zephyra's target so their next attack has advantage."]}; }},
+        {id:"dash",name:"Dash",tags:["fly 60 ft"],card:function(){ return {rows:[["Movement", d("60 ft")+' <span class="vs">flying</span>']],notes:["Scout, or carry it into position for Channel Magic."]}; }},
+        {id:"diseng",name:"Disengage",tags:["no OAs"],card:function(){ return {rows:[["This turn","Its movement doesn't provoke opportunity attacks."]],notes:[]}; }},
+        {id:"hide",name:"Hide",tags:["Stealth +5"],card:function(){ return {rows:[["It rolls", d("d20 + 5")+' <span class="vs">(Stealth)</span>'+vs("each enemy's passive Perception")]],notes:["Tiny, so light cover is often enough."]}; }},
+        {id:"search",name:"Search",tags:["Perception +6"],card:function(){ return {rows:[["It rolls", d("d20 + 6")+' <span class="vs">(Perception)</span>'+vs("DC set by the DM, or a hider's Stealth")]],notes:["Good scout: passive Perception 16, darkvision 60 ft."]}; }}
+      ];
+    },
+    react:function(){ return [
+      {id:"hold",name:"Hold it",tags:["until next turn"],card:function(){ return {rows:[["Reaction","Available until the start of your next turn."]],notes:["Concentrating and hit? Roll d20 + 5 vs DC 10 or half the damage, whichever is higher."+(MSH()?" If it fails, Mind Sharpener can save it.":"")]}; }},
+      {id:"oa",name:"Opportunity attack",tags:[M()==="g"?"gauntlet":"shortsword"],card:function(){ var c = M()==="g" ? attackCard("atk1") : sword.card(); c.notes=["Trigger: a creature leaves your 5 ft reach.","One attack only, no Extra Attack."].concat(M()==="i"?["Only if the shortsword is already drawn. The launcher can't make opportunity attacks."]:[]); return c; }},
+      {id:"absorb",name:"Absorb Elements",tags:["when hit"],lv:[1,2],spell:true,leveled:true,card:function(lv){ return {rows:[["Trigger","You take acid, cold, fire, lightning or thunder damage."],["Effect","Resistance to that type, including the triggering hit, until the start of your next turn."],["Next melee hit",'+'+d(lv+"d6")+" of that type"]],notes:[M()==="i"?"Launcher shots aren't melee, so no bonus damage in Infiltrator.":"Stacks nicely on your first gauntlet hit next turn."]}; }},
+      {id:"feather",name:"Feather Fall",tags:["60 ft"],lv:[1,2],spell:true,leveled:true,card:function(){ return {rows:[["Trigger","You or creatures within 60 ft fall."],["Effect","Up to 5 creatures fall 60 ft/round and take no fall damage."]],notes:[]}; }},
+      MSH()&&{id:"sharp",name:"Mind Sharpener",tags:["concentration","1 charge"],fixed:"msc",card:function(){ return {rows:[["First roll", d("d20 + 5")+vs("DC 10 or half the damage, whichever is higher")],["If you fail","Spend 1 charge: the failed save becomes a success."]],notes:["Pick this only if you actually spend the charge. Regains 1d4 charges at dawn."]}; }}
+    ]; }
+  };
+
+  var SLOTS=[
+    {id:"move",label:"Move",q:"How do you move?"},
+    {id:"action",label:"Action",q:"What's your action?"},
+    {id:"atk1",label:"Attack 1",q:"First attack",when:function(){ return turn.action&&turn.action.id==="attack"; }},
+    {id:"atk2",label:"Extra Attack",q:"Second attack",when:function(){ return turn.action&&turn.action.id==="attack"; }},
+    {id:"bonus",label:"Bonus action",q:"What's your bonus action?"},
+    {id:"homu",label:"Homunculus",q:"What does the homunculus do?",when:function(){ return HS(); }},
+    {id:"react",label:"Reaction",q:"What's your reaction for this round?"}
+  ];
+  function steps(){ return SLOTS.filter(function(s){ return !s.when || s.when(); }); }
+  function opts_(slot){ return OPTS[slot]().filter(function(o){ return o && !(o.guardOnly && M()!=="g"); }); }
+  function findOpt(slot,id){ return opts_(slot).filter(function(o){ return o.id===id; })[0]; }
+  function costKey(o,lv){ if(o.fixed) return o.fixed; if(!o.lv) return null; return lv==="free" ? o.free : (lv===1?"s1":"s2"); }
+  function pending(key,except){
+    var n=0; Object.keys(turn).forEach(function(s){ if(s===except||!turn[s]) return; var o=findOpt(s,turn[s].id); if(o&&costKey(o,turn[s].lv)===key) n++; });
+    return n;
+  }
+  function left(key,except){ return MAX[key]-(state.used[key]||0)-pending(key,except); }
+  function lvOk(o,lv,slot){ var k=costKey(o,lv); return !k || left(k,slot)>0; }
+  function whyDisabled(slot,o){
+    if(o.guardOnly && M()!=="g") return o.id==="oa" ? "Launcher is ranged: no opportunity attacks in Infiltrator." : "Guardian model only.";
+    if(o.fixed && left(o.fixed,slot)<=0) return "No uses left.";
+    if(o.lv && !o.lv.some(function(lv){ return lvOk(o,lv,slot); })) return "No spell slots left for this.";
+    if(slot==="action" && o.leveled){ var b=turn.bonus&&findOpt("bonus",turn.bonus.id); if(b&&b.leveled) return b.name+" is your bonus action: only a cantrip as your action this turn."; }
+    if(slot==="bonus" && o.leveled){ var a=turn.action&&findOpt("action",turn.action.id); if(a&&a.leveled) return a.name+" is your action: no bonus-action spell this turn."; }
+    return null;
+  }
+  function clean(){
+    if(!HS()) { delete turn.homu; delete out.homu; }
+    // drop choices that no longer apply
+    if(!(turn.action&&turn.action.id==="attack")){ delete turn.atk1; delete turn.atk2; delete out.atk1; delete out.atk2; }
+    if(turn.homu){ var ok=opts_("homu").some(function(o){ return o.id===turn.homu.id; }); if(!ok) delete turn.homu; }
+    Object.keys(turn).forEach(function(s){ var o=findOpt(s,turn[s].id); if(!o) { delete turn[s]; return; } });
+  }
+
+  var elSteps=document.getElementById("simSteps"), elPanel=document.getElementById("simPanel"),
+      elBack=document.getElementById("simBack"), elNext=document.getElementById("simNext");
+
+  function short(slot){
+    var c=turn[slot]; if(!c) return "";
+    var o=findOpt(slot,c.id); if(!o) return "";
+    var s=o.name; if(out[slot]) s+=" · "+out[slot];
+    return s;
+  }
+  var LAST={
+    brew:function(lv){ return {len:9,acid:true,dice:(2*lv)+"d4",text:"Each creature covered in acid takes "+(2*lv)+"d4 acid at the start of its turn. Ends early if it uses its action to scrape it off."}; },
+    ff:function(){ return {len:9,text:"Outlined creatures: attacks against them have advantage, and they can't be invisible."}; },
+    grease:function(){ return {len:9,text:"A creature entering the grease or ending its turn there: DEX save vs DC 16 or fall prone. Difficult terrain."}; },
+    sanct:function(){ return {len:9,text:"Anyone targeting the warded creature with an attack or harmful spell: WIS save vs DC 16 or pick another target. Ends if the warded creature attacks or harms an enemy."}; },
+    mirror:function(){ return {len:9,text:"When you're attacked, roll d20: 6+ with 3 duplicates, 8+ with 2, 11+ with 1, and the attack targets a duplicate (AC 12)."}; },
+    sliver:function(){ return {len:1,text:"The target subtracts 1d4 from its next save before the end of your next turn."}; },
+    cmd:function(){ return {len:1,text:"Targets that failed follow your command on their next turn."}; },
+    dodge:function(){ return {len:1,slots:["action"],text:"Until your next turn: attacks against you have disadvantage, your DEX saves have advantage."}; },
+    absorb:function(lv){ return {len:1,text:"Resistance to the triggering type until your turn starts. First melee hit on your next turn: +"+lv+"d6 of that type."}; }
+  };
+  if(!Array.isArray(state.fx)) state.fx=[];
+  // one-time migration: old concentration without an effect entry stays as a badge only
+  function dropConc(){ state.conc=null; state.fx=state.fx.filter(function(f){ return !f.conc; }); }
+  function kindOf(o,slot){ if(slot==="action"&&o.id==="attack") return "weapon"; return o.leveled?"spell":(o.spell?"cantrip":"other"); }
+  function lvlBadge(o){ if(!o.lv) return "Cantrip"; var n=o.lv.filter(function(l){ return l!=="free"; }); var m=Math.min.apply(null,n); return m===1?"1st":"2nd"; }
+  function renderFx(){
+    var box=document.getElementById("simFx");
+    if(!state.fx.length){ box.hidden=true; box.innerHTML=""; return; }
+    box.hidden=false;
+    var h='<div class="fxh">Ongoing effects</div>';
+    state.fx.forEach(function(f,i){
+      var left=f.until-state.round+1;
+      h+='<div class="fx'+(f.acid?" fx-acid":"")+'"><div class="fxn">'+esc(f.name)+(f.conc?" (concentration)":"")+'<small>'+(left<=1?"last round":left+" rounds left")+'</small></div>'+
+        '<div class="fxt">'+esc(f.text)+(f.acid?'<span class="roll-now">When each covered creature\'s turn starts: roll '+esc(f.dice)+' acid.</span>':"")+'</div>'+
+        '<button type="button" data-fx="'+i+'" aria-label="End '+esc(f.name)+'">End</button></div>';
+    });
+    box.innerHTML=h;
+    box.querySelectorAll("[data-fx]").forEach(function(b){ b.onclick=function(){ var f=state.fx[+b.dataset.fx]; if(f&&f.conc) state.conc=null; state.fx.splice(+b.dataset.fx,1); save(); sim(); }; });
+  }
+  function esc(t){ return String(t).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+  function sim(){
+    clean();
+    var st=steps(); if(cur>st.length) cur=st.length;
+    document.getElementById("simRound").textContent="Round "+state.round;
+    document.getElementById("simModel").textContent=(M()==="g"?"Guardian":"Infiltrator")+" · AC "+AC()+" · "+S()+" ft";
+    var cEl=document.getElementById("simConc");
+    cEl.innerHTML = state.conc ? '<span class="conc">Concentrating: '+esc(state.conc)+' <button type="button" id="dropConc" aria-label="Drop concentration">✕</button></span>' : "";
+    if(state.conc) document.getElementById("dropConc").onclick=function(){ dropConc(); save(); sim(); };
+    renderFx();
+
+    // stepper
+    elSteps.innerHTML="";
+    st.concat([{id:"_sum",label:"Summary"}]).forEach(function(s,i){
+      var li=document.createElement("li"), b=document.createElement("button"); b.type="button";
+      b.innerHTML=esc(s.label)+(turn[s.id]?"<small>"+esc(short(s.id))+"</small>":"");
+      if(turn[s.id]) b.className="done";
+      if(i===cur) b.setAttribute("aria-current","step");
+      b.onclick=function(){ cur=i; sim(); };
+      li.appendChild(b); elSteps.appendChild(li);
+    });
+
+    elBack.disabled = cur===0;
+    if(cur===st.length){ renderSummary(st); elNext.textContent="End turn"; return; }
+    var slot=st[cur], sid=slot.id, sel=turn[sid];
+    elNext.textContent = cur+1<st.length ? (sel?"Next: ":"Skip to ")+st[cur+1].label : "Summary";
+
+    var h='<h3>'+esc(slot.q)+'</h3>';
+    if(sid==="react") h+='<p class="hint">Your reaction happens off-turn, before your next turn starts.</p>';
+    if(sid==="homu") h+='<p class="hint">It acts right after your turn.'+(turn.bonus&&turn.bonus.id==="homu"?" You commanded it.":" You didn't command it, so it Dodges.")+'</p>';
+    h+='<div class="opts">';
+    var opts=opts_(sid), reason=null;
+    var GRP=[["weapon","Weapon"],["cantrip","Cantrips · at will, no slot"],["spell","Spells · use a slot"],["other",sid==="action"?"Other actions":"Other"]];
+    var kinds={}; opts.forEach(function(o){ kinds[kindOf(o,sid)]=1; });
+    var grouped=Object.keys(kinds).length>1 && (kinds.cantrip||kinds.spell);
+    GRP.forEach(function(g){
+      var list=opts.filter(function(o){ return kindOf(o,sid)===g[0]; });
+      if(!list.length) return;
+      if(grouped) h+='<div class="ogrp">'+esc(g[1])+'</div>';
+      list.forEach(function(o){
+        var why=whyDisabled(sid,o), on=sel&&sel.id===o.id, k=kindOf(o,sid);
+        if(on&&why) reason=why;
+        var tags=o.tags.filter(function(t){ return t!=="cantrip"&&t!=="2nd level"; }); if(o.conc) tags.unshift("concentration");
+        var badge=(k==="spell"||k==="cantrip")?'<em>'+lvlBadge(o)+'</em>':"";
+        h+='<button type="button" class="opt '+k+'" data-o="'+o.id+'" aria-pressed="'+(on?"true":"false")+'"'+(why&&!on?' disabled title="'+esc(why)+'"':"")+'>'+badge+'<b>'+esc(o.name)+'</b>'+(why&&!on?'<span class="whyin">'+esc(why)+'</span>':(tags.length?'<span>'+esc(tags.join(" · "))+'</span>':""))+'</button>';
+      });
+    });
+    h+='</div>';
+    // list disabled reasons compactly
+
+    if(sel){
+      var o=findOpt(sid,sel.id), c=o.card(sel.lv);
+      h+='<div class="card"><h4>'+esc(o.name)+(sel.lv?' <span class="vs">('+LVNAME[sel.lv]+')</span>':"")+'</h4>';
+      if(o.lv && (o.lv.length>1 || o.free)){
+        h+='<div class="seg" role="group" aria-label="Cast with">';
+        o.lv.forEach(function(lv){ var k=costKey(o,lv), n=k?left(k,sid):0, ok=lvOk(o,lv,sid);
+          h+='<button type="button" data-lv="'+lv+'" aria-pressed="'+(sel.lv===lv?"true":"false")+'"'+(ok?"":" disabled")+'>'+LVNAME[lv]+' ('+n+' left)</button>'; });
+        h+='</div>';
+      }
+      h+='<dl class="roll">';
+      c.rows.forEach(function(r){ h+='<dt>'+esc(r[0])+'</dt><dd>'+r[1]+'</dd>'; });
+      h+='</dl>';
+      if(o.outcome){
+        h+='<div class="seg" role="group" aria-label="Result" style="margin-top:10px">';
+        ["hit","crit","miss"].forEach(function(r){ h+='<button type="button" data-out="'+r+'" aria-pressed="'+(out[sid]===r?"true":"false")+'">'+r[0].toUpperCase()+r.slice(1)+'</button>'; });
+        h+='</div>';
+      }
+      var notes=c.notes.slice();
+      if(o.conc && state.conc && state.conc!==o.name) notes.unshift('<span class="warn">Ends your concentration on '+esc(state.conc)+'.</span>');
+      if(o.conc) notes.push("Concentration: taking damage means d20 + 5 vs DC 10 or half the damage."+(MSH()?" Mind Sharpener can turn a fail into a success.":""));
+      if(reason) notes.unshift('<span class="warn">'+esc(reason)+'</span>');
+      if(notes.length){ h+='<ul>'; notes.forEach(function(n){ h+='<li>'+(n.indexOf("<span")===0?n:esc(n))+'</li>'; }); h+='</ul>'; }
+      h+='</div>';
+    }
+    elPanel.innerHTML=h;
+    elPanel.querySelectorAll(".opt").forEach(function(b){ b.onclick=function(){
+      var o=findOpt(sid,b.dataset.o);
+      if(sel&&sel.id===o.id){ delete turn[sid]; delete out[sid]; }
+      else{
+        var lv=null; if(o.lv){ lv=o.lv.filter(function(l){ return lvOk(o,l,sid); })[0]; }
+        turn[sid]={id:o.id,lv:lv}; delete out[sid];
+      }
+      sim();
+    }; });
+    elPanel.querySelectorAll("[data-lv]").forEach(function(b){ b.onclick=function(){ var v=b.dataset.lv; turn[sid].lv = v==="free"?"free":+v; sim(); }; });
+    elPanel.querySelectorAll("[data-out]").forEach(function(b){ b.onclick=function(){ out[sid] = out[sid]===b.dataset.out ? undefined : b.dataset.out; if(!out[sid]) delete out[sid]; sim(); }; });
+  }
+
+  function costs(){
+    var list=[]; Object.keys(turn).forEach(function(s){ var o=findOpt(s,turn[s].id); var k=o&&costKey(o,turn[s].lv); if(k) list.push(k); });
+    return list;
+  }
+  function renderSummary(st){
+    var h='<h3>Turn summary</h3>';
+    if(msg){ h+='<p class="hint">'+esc(msg)+'</p>'; }
+    h+='<ul class="summary">';
+    st.forEach(function(s){
+      var c=turn[s.id], txt='<small>—</small>';
+      if(c){ var o=findOpt(s.id,c.id); txt=esc(o.name)+(c.lv?' <small>('+LVNAME[c.lv]+')</small>':"")+(out[s.id]?' <small>· '+out[s.id]+'</small>':""); }
+      h+='<li><span class="k">'+esc(s.label)+'</span><span class="v">'+txt+'</span></li>';
+    });
+    h+='</ul>';
+    var names={}; RES.forEach(function(r){ names[r[0]]=r[1].replace(/s$/,""); });
+    var cs=costs();
+    h+='<p class="note">'+(cs.length ? "Uses: "+esc(cs.map(function(k){ return names[k]; }).join(", "))+". End turn marks them in the tracker." : "Uses no limited resources.")+'</p>';
+    elPanel.innerHTML=h;
+  }
+
+  function endTurn(){
+    costs().forEach(function(k){ state.used[k]=Math.min(MAX[k],(state.used[k]||0)+1); });
+    var R0=state.round;
+    Object.keys(turn).forEach(function(s){
+      var o=findOpt(s,turn[s].id); if(!o) return;
+      if(o.conc){ dropConc(); state.conc=o.name; }
+      var mk=LAST[o.id]; if(!mk || (s!=="action"&&s!=="bonus"&&s!=="react")) return;
+      var f=mk(turn[s].lv); if(f.slots&&f.slots.indexOf(s)<0) return;
+      state.fx=state.fx.filter(function(x){ return x.id!==o.id; });
+      state.fx.push({id:o.id,base:o.name,name:o.name+(turn[s].lv&&turn[s].lv!=="free"&&turn[s].lv>1&&o.lv&&o.lv[0]!==turn[s].lv?" (2nd)":""),text:f.text,acid:!!f.acid,dice:f.dice||"",conc:!!o.conc,until:R0+f.len});
+    });
+    if(turn.bonus&&turn.bonus.id==="df"){ state.hp.temp=5; hpSay("Defensive Field: temp HP set to 5."); }
+    state.round++;
+    state.fx=state.fx.filter(function(f){ if(state.round>f.until){ if(f.conc&&state.conc===f.base) state.conc=null; return false; } return true; });
+    save(); renderHP();
+    turn={}; out={}; cur=0; msg="";
+    renderTrack(); sim();
+  }
+  elBack.onclick=function(){ if(cur>0){ cur--; sim(); } };
+  elNext.onclick=function(){ var st=steps(); if(cur===st.length){ endTurn(); } else { cur++; sim(); } };
+  document.getElementById("simNew").onclick=function(){ turn={}; out={}; cur=0; sim(); };
+
+  // sample starting state so the first view shows a filled card
+  turn.move={id:"move",lv:null};
+  refresh();
+})();
+</script>
