@@ -189,7 +189,8 @@ dl.roll dd{margin:0 0 8px}
 .eqrow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
 .eqrow:first-child{border-top:0}
 .eqrow.out .eqn,.eqrow.out .eqd{opacity:.55}
-.eqn{font-weight:700;overflow-wrap:anywhere}
+.eqn{font:700 1rem "Alegreya Sans",sans-serif;color:var(--ink);background:none;border:0;padding:4px 0;text-align:left;cursor:pointer;overflow-wrap:anywhere;text-decoration:underline dotted var(--line);text-underline-offset:3px}
+.eqn:focus-visible{outline:3px solid var(--brass);outline-offset:1px}
 .eqd{grid-column:1/2;font-size:.85rem;color:var(--muted);overflow-wrap:anywhere}
 .qty{grid-row:1/3;grid-column:2;display:flex;align-items:center;gap:4px}
 .qty button{min-width:40px;min-height:40px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:6px;font:700 1rem "Alegreya Sans",sans-serif;cursor:pointer;padding:0 8px}
@@ -197,6 +198,7 @@ dl.roll dd{margin:0 0 8px}
 .qty b{min-width:2em;text-align:center;font-variant-numeric:tabular-nums}
 .eqadd{display:grid;grid-template-columns:1fr 5em;gap:6px;padding:10px 0;border-top:1px solid var(--line)}
 .eqadd>*{grid-column:1/-1}
+.eqbtns{display:flex;gap:6px}.eqbtns .btn{flex:1}.eqbtns [hidden]{display:none}
 .eqadd #eqName{grid-column:1/2}.eqadd #eqQty{grid-column:2/3}
 .eqadd input,.eqadd select,input.amt{min-height:44px;min-width:0;width:100%;font:700 1rem "Alegreya Sans",sans-serif;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
 input.amt{width:6em;vertical-align:middle}
@@ -438,10 +440,10 @@ input.amt{width:6em;vertical-align:middle}
         <option value="use">Consumable</option>
       </select>
       <input id="eqDetail" placeholder="Effect" aria-label="Effect" autocomplete="off" hidden>
-      <button type="submit" class="btn">Add item</button>
+      <div class="eqbtns"><button type="submit" class="btn" id="eqSubmit">Add item</button><button type="button" class="btn" id="eqCancel" hidden>Cancel</button></div>
     </form>
   </div>
-  <p class="note">Healing potions and consumables show up as <i>Use an item</i> in the simulator's action step; ending the turn uses one up. Long rest doesn't touch equipment. Saved on this device only.</p>
+  <p class="note">Healing potions and consumables show up as <i>Use an item</i> in the simulator's action step; ending the turn uses one up. Tap an item's name to edit it. Long rest doesn't touch equipment. Saved on this device only.</p>
 </main>
 <script>
 (function(){
@@ -501,6 +503,7 @@ input.amt{width:6em;vertical-align:middle}
     var ewRow=document.getElementById("ewRow"); ewRow.hidden=!on("ew");
     var ewSeg=document.getElementById("ewSeg"); ewSeg.innerHTML="";
     [["g","Gauntlets"],["i","Launcher"],["s","Shortsword"]].forEach(function(o){
+      if(o[0]==="s" && !hasSword() && state.ew!=="s") return;
       var b=document.createElement("button"); b.type="button"; b.textContent=o[1];
       b.setAttribute("aria-pressed",state.ew===o[0]?"true":"false");
       b.onclick=function(){ state.ew=o[0]; save(); refresh(); }; ewSeg.appendChild(b);
@@ -541,7 +544,7 @@ input.amt{width:6em;vertical-align:middle}
     var il=document.getElementById("infList"); il.innerHTML="";
     INF.forEach(function(f){
       var act=on(f.id), extra="";
-      if(f.id==="ew"&&act) extra=" Currently on: "+W(state.ew).name+".";
+      if(f.id==="ew"&&act) extra=" Currently on: "+W(state.ew).name+"."+(state.ew==="s"&&!hasSword()?" The shortsword isn't in your equipment.":"");
       il.insertAdjacentHTML("beforeend",'<div class="row'+(act?"":" inactive")+'"><span class="name">'+e_(f.name)+'</span> <span class="chips"><span class="chip '+(act?"on":"off")+'">'+(act?"Active":"Known")+'</span></span><div class="eff">'+e_(f.desc+extra)+'</div></div>');
     });
 
@@ -556,16 +559,22 @@ input.amt{width:6em;vertical-align:middle}
   var EQ_SEED=[["Shortsword",1],["Light crossbow",1],["Crossbow bolts",20],["Smith's tools",1],["Thieves' tools",1],["Tinker's tools",1],
     ["Alchemist's supplies",1],["Dungeoneer's pack",1],["Bedroll",1],["Black ink",1],["Quill",1],["Small knife",1],["Common clothes",1],
     ["Gold (gp)",94],["Silver (sp)",1],["Copper (cp)",5]];
-  // the first equipment build seeded a guessed list (ids e1..e6, incl. a potion); replace it if untouched
-  var EQ_OLD='[{"id":"e1","name":"Potion of healing","qty":1,"kind":"heal","detail":"2d4 + 2"},{"id":"e2","name":"Smith\'s tools","qty":1,"kind":"gear"},{"id":"e3","name":"Thieves\' tools","qty":1,"kind":"gear"},{"id":"e4","name":"Tinker\'s tools","qty":1,"kind":"gear"},{"id":"e5","name":"Light crossbow","qty":1,"kind":"gear"},{"id":"e6","name":"Crossbow bolts","qty":20,"kind":"gear"}]';
-  if(!Array.isArray(state.eq) || JSON.stringify(state.eq)===EQ_OLD)
-    state.eq=EQ_SEED.map(function(x,i){ return {id:"s"+i,name:x[0],qty:x[1],kind:"gear"}; });
+  // Seed once, merging by name so edits survive. The first equipment build seeded a guessed list
+  // (ids e1..e6); its made-up potion (e1) is dropped if still untouched.
+  if(!Array.isArray(state.eq)) state.eq=[];
+  if(!state.eqSeeded){
+    state.eq=state.eq.filter(function(x){ return !(x.id==="e1"&&x.name==="Potion of healing"&&x.qty===1&&x.kind==="heal"&&x.detail==="2d4 + 2"); });
+    var have={}; state.eq.forEach(function(x){ have[x.name.toLowerCase()]=1; });
+    EQ_SEED.forEach(function(x,i){ if(!have[x[0].toLowerCase()]) state.eq.push({id:"s"+i,name:x[0],qty:x[1],kind:"gear"}); });
+    state.eqSeeded=1;
+  }
   function hasItem(re){ return state.eq.some(function(x){ return x.qty>0&&re.test(x.name); }); }
+  function hasSword(){ return hasItem(/shortsword/i); }
   function eqById(id){ return state.eq.filter(function(x){ return x.id===id; })[0]; }
   function renderEq(){
     var h="";
     state.eq.forEach(function(x){
-      h+='<div class="eqrow'+(x.qty>0?"":" out")+'"><span class="eqn">'+e_(x.name)+'</span>'+
+      h+='<div class="eqrow'+(x.qty>0?"":" out")+'"><button type="button" class="eqn" data-edit="'+x.id+'" aria-label="Edit '+e_(x.name)+'">'+e_(x.name)+'</button>'+
         '<span class="qty"><button type="button" data-eq="'+x.id+'" data-d="-1" aria-label="One fewer '+e_(x.name)+'"'+(x.qty>0?"":" disabled")+'>−</button><b>'+x.qty+'</b>'+
         '<button type="button" data-eq="'+x.id+'" data-d="1" aria-label="One more '+e_(x.name)+'">+</button>'+
         '<button type="button" class="del" data-eq="'+x.id+'" data-d="x" aria-label="Remove '+e_(x.name)+'">✕</button></span>'+
@@ -576,18 +585,31 @@ input.amt{width:6em;vertical-align:middle}
       var x=eqById(b.dataset.eq); if(!x) return;
       if(b.dataset.d==="x") state.eq=state.eq.filter(function(y){ return y!==x; });
       else x.qty=Math.max(0,x.qty+(+b.dataset.d));
+      if(eqAdd.dataset.editing===x.id) eqDone();
       save(); refresh();
     }; });
+    l.querySelectorAll("[data-edit]").forEach(function(b){ b.onclick=function(){ eqEdit(eqById(b.dataset.edit)); }; });
   }
-  var eqKind=document.getElementById("eqKind"), eqDetail=document.getElementById("eqDetail");
+  var eqName=document.getElementById("eqName"), eqQty=document.getElementById("eqQty"), eqKind=document.getElementById("eqKind"), eqDetail=document.getElementById("eqDetail");
   function eqForm(){ var k=eqKind.value; eqDetail.hidden=k==="gear"; eqDetail.placeholder=k==="heal"?"Heals, e.g. 2d4 + 2":"Effect, e.g. 1 min of bright light"; eqDetail.setAttribute("aria-label",eqDetail.placeholder); }
   eqKind.onchange=eqForm; eqForm();
-  document.getElementById("eqAdd").onsubmit=function(ev){
+  var eqAdd=document.getElementById("eqAdd"), eqSubmit=document.getElementById("eqSubmit"), eqCancel=document.getElementById("eqCancel");
+  // Editing reuses the add form: fill it, submit saves into the existing item.
+  function eqEdit(x){ if(!x) return;
+    eqAdd.dataset.editing=x.id; eqName.value=x.name; eqQty.value=x.qty; eqKind.value=x.kind; eqForm(); eqDetail.value=x.detail||"";
+    eqSubmit.textContent="Save"; eqCancel.hidden=false;
+    eqAdd.scrollIntoView({block:"nearest",behavior:smooth()}); eqName.focus({preventScroll:true}); }
+  function eqDone(){ delete eqAdd.dataset.editing; eqAdd.reset(); eqForm(); eqSubmit.textContent="Add item"; eqCancel.hidden=true; }
+  eqCancel.onclick=eqDone;
+  eqAdd.onsubmit=function(ev){
     ev.preventDefault();
-    var name=document.getElementById("eqName").value.trim(); if(!name) return;
-    var q=parseInt(document.getElementById("eqQty").value,10), k=eqKind.value, dt=eqDetail.value.trim();
-    state.eq.push({id:"e"+Date.now().toString(36),name:name,qty:isNaN(q)?1:Math.max(0,q),kind:k,detail:k==="gear"?"":(dt||(k==="heal"?"2d4 + 2":""))});
-    this.reset(); eqForm(); save(); refresh();
+    var name=eqName.value.trim(); if(!name) return;
+    var q=parseInt(eqQty.value,10), k=eqKind.value, dt=eqDetail.value.trim();
+    var v={name:name,qty:isNaN(q)?1:Math.max(0,q),kind:k,detail:k==="gear"?"":(dt||(k==="heal"?"2d4 + 2":""))};
+    var x=eqAdd.dataset.editing&&eqById(eqAdd.dataset.editing);
+    if(x) Object.keys(v).forEach(function(f){ x[f]=v[f]; });
+    else{ v.id="e"+Date.now().toString(36); state.eq.push(v); }
+    eqDone(); save(); refresh();
   };
 
   // ---------- tracker ----------
@@ -712,7 +734,7 @@ input.amt{width:6em;vertical-align:middle}
     notes:(w.plus?["Includes +1 from Enhanced Weapon."]:[]).concat(["Use it when an enemy is in your face: the launcher has disadvantage within 5 ft, the sword doesn't.","Drawing it is your free object interaction. No launcher +1d6 on sword hits."])}; }};
   function atkOpts(slot){ var a=[{id:"strike",name:M()==="g"?"Gauntlet strike":"Launcher shot",tags:[sg(W(M()).atk)],outcome:true,card:function(){ return attackCard(slot); }}];
     sword.tags=[sg(W("s").atk),"melee"];
-    if(M()==="i") a.push(sword); a.push(grapple); return a; }
+    if(M()==="i" && hasSword()) a.push(sword); a.push(grapple); return a; }
   // Usable equipment: one option per heal/consumable item with stock left (hidden at 0).
   function itemOpts(){ return state.eq.filter(function(x){ return x.kind!=="gear"&&x.qty>0; }).map(function(x){
     var heal=x.kind==="heal";
@@ -975,7 +997,7 @@ input.amt{width:6em;vertical-align:middle}
     }; });
     elPanel.querySelectorAll("[data-lv]").forEach(function(b){ b.onclick=function(){ var v=b.dataset.lv; turn[sid].lv = v==="free"?"free":+v; sim(); }; });
     elPanel.querySelectorAll("[data-who]").forEach(function(b){ b.onclick=function(){ turn[sid].who=b.dataset.who; sim(); }; });
-    var ia=elPanel.querySelector("#itemAmt"); if(ia) ia.onchange=function(){ turn[sid].amt=Math.max(0,num(this.value,0)); };
+    var ia=elPanel.querySelector("#itemAmt"); if(ia) ia.oninput=function(){ turn[sid].amt=Math.max(0,num(this.value,0)); };
     elPanel.querySelectorAll("[data-out]").forEach(function(b){ b.onclick=function(){ out[sid] = out[sid]===b.dataset.out ? undefined : b.dataset.out; if(!out[sid]) delete out[sid]; sim(); }; });
   }
 
@@ -1004,9 +1026,9 @@ input.amt{width:6em;vertical-align:middle}
 
   function itemUse(){ var c=turn.action, o=c&&findOpt("action",c.id), x=o&&o.item&&eqById(o.item); return x?{o:o,c:c,x:x}:null; }
   function endTurn(){
-    var iu=itemUse();
+    var iu=itemUse(), said=[];
     if(iu){ iu.x.qty=Math.max(0,iu.x.qty-1);
-      if(iu.x.kind==="heal"&&(iu.c.who||"self")==="self") hpSay(iu.c.amt ? iu.x.name+": healed "+heal(iu.c.amt)+"." : iu.x.name+" used: enter what you rolled and tap Heal.");
+      if(iu.x.kind==="heal"&&(iu.c.who||"self")==="self") said.push(iu.c.amt ? e_(iu.x.name)+": healed "+heal(iu.c.amt)+"." : e_(iu.x.name)+" used: enter what you rolled and tap Heal.");
       renderEq(); renderLoadout(); }
     costs().forEach(function(k){ state.used[k]=Math.min(MAX[k],(state.used[k]||0)+1); });
     var R0=state.round;
@@ -1018,7 +1040,8 @@ input.amt{width:6em;vertical-align:middle}
       state.fx=state.fx.filter(function(x){ return x.id!==o.id; });
       state.fx.push({id:o.id,base:o.name,name:o.name+(turn[s].lv&&turn[s].lv!=="free"&&turn[s].lv>1&&o.lv&&o.lv[0]!==turn[s].lv?" (2nd)":""),text:f.text,acid:!!f.acid,dice:f.dice||"",conc:!!o.conc,until:R0+f.len});
     });
-    if(turn.bonus&&turn.bonus.id==="df"){ state.hp.temp=5; hpSay("Defensive Field: temp HP set to 5."); }
+    if(turn.bonus&&turn.bonus.id==="df"){ state.hp.temp=5; said.push("Defensive Field: temp HP set to 5."); }
+    if(said.length) hpSay(said.join(" "));
     state.round++;
     state.fx=state.fx.filter(function(f){ if(state.round>f.until){ if(f.conc&&state.conc===f.base) state.conc=null; return false; } return true; });
     save(); renderHP();
