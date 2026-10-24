@@ -23,7 +23,6 @@ GitHub Pages: https://dorukdestan.com/DnD/. `.github/workflows/pages.yml` runs t
 
 Artifact page: https://claude.ai/artifact/Grs1tdXE2i9FkjKQyay9dr (private, owned by destan@destan.dev).
 Republish by passing that URL as `url` to the Artifact tool with `file_path: src/cheatsheet.html`. Read it first (`action: "read"`) in a new session; the tool refuses a publish to an artifact the session hasn't read. Omit `icon` on republish.
-A duplicate "(Copy)" artifact exists (Y6VckNyFX8Y16Hrzd9dksX); it is stale, not updated.
 
 ## Rules decisions
 
