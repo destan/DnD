@@ -12,9 +12,19 @@ Single-page D&D 5e cheatsheet + turn simulator for **Solethis "Sol" Starglance**
 ## Commands
 
 ```sh
-npm install          # playwright (pinned to 1.56.1, matches the Chromium preinstalled in Claude Code cloud sessions)
+npm install          # playwright, pinned to 1.56.1 (expects chromium_headless_shell-1194)
 npm run build        # -> dist/index.html
 npm test             # builds, then runs the smoke test
+```
+
+Cloud sessions may preinstall a different Chromium build in `/opt/pw-browsers`, and the network blocks `npx playwright install`. On 2026-10-24 the preinstalled build was 1243. If the test reports a missing executable, point Playwright at the preinstalled build through a scratch folder:
+
+```sh
+PW=<scratch>/pw; B=$(ls -d /opt/pw-browsers/chromium_headless_shell-* | tail -1)
+mkdir -p $PW/chromium_headless_shell-1194/chrome-linux
+ln -sfn $B/chrome-headless-shell-linux64/chrome-headless-shell $PW/chromium_headless_shell-1194/chrome-linux/headless_shell
+touch $PW/chromium_headless_shell-1194/{INSTALLATION_COMPLETE,DEPENDENCIES_VALIDATED}
+PLAYWRIGHT_BROWSERS_PATH=$PW npm test
 ```
 
 ## Publishing
