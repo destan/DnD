@@ -397,7 +397,7 @@ input.amt{width:6em;vertical-align:middle}
   <div class="rows">
     <div class="row"><span class="name">Stats</span><div class="eff">HP 11 (1 + INT 5 + level 5), AC 13, walk 20 ft, fly 30 ft. DEX save +5, Stealth +5, Perception +6 (passive 16), darkvision 60 ft. Evasion; immune to poison. Shares your initiative and takes its turn right after yours. <i>Mending</i> heals it 2d6.</div></div>
     <div class="row"><span class="name">Force Strike</span><span class="chips"><span class="chip">Your bonus action</span><span class="chip">30 ft</span><span class="chip">+8</span></span>
-      <div class="eff"><span class="force">1d4+3 force</span>. If you don't command it, it just Dodges.</div></div>
+      <div class="eff"><span class="force">1d4+3 force</span>. If you don't command it, it just Dodges. If you're incapacitated, it can take any action it chooses.</div></div>
     <div class="row"><span class="name">Channel Magic</span><span class="chips"><span class="chip">Its reaction</span><span class="chip">120 ft</span></span>
       <div class="eff">Delivers a touch-range spell you cast through it.</div></div>
   </div>
@@ -408,7 +408,7 @@ input.amt{width:6em;vertical-align:middle}
 
   <h2>Utility</h2>
   <ul>
-    <li><b>Magical Tinkering</b> (action, touch tiny object): dim light 5 ft, a 6-second recorded message, an odor or sound, or a static image. Max 5 at once.</li>
+    <li><b>Magical Tinkering</b> (action, thieves' or artisan's tools in hand, touch a Tiny nonmagical object): dim light 5 ft, a 6-second recorded message, an odor or sound, or a static image. Max 5 at once.</li>
     <li><b>Right Tool for the Job:</b> 1 hour with thieves' or artisan's tools makes one set of artisan's tools.</li>
     <li><b>Elf:</b> advantage vs. charm, immune to magical sleep, 4-hour trance.</li>
   </ul>
@@ -524,7 +524,7 @@ input.amt{width:6em;vertical-align:middle}
       '<div class="weapon"><span class="name big">Thunder Gauntlets</span> <span class="chips"><span class="chip">Melee 5 ft</span><span class="chip">'+sg(g.atk)+'</span>'+ewTag(g)+'</span></div>'+
       '<p><span class="thunder">1d8'+sg(g.dmg)+' thunder</span>, two attacks per Attack action (≈'+Math.round(2*(4.5+g.dmg))+' dmg if both hit).</p>'+
       '<p>On hit: target has <b>disadvantage attacking anyone but you</b> until the start of your next turn.</p>'+
-      '<p><b>Defensive Field</b> (bonus action): gain 5 temp HP, replaces current temp HP. 3 uses per long rest.</p>'+
+      '<p><b>Defensive Field</b> (bonus action): gain 5 temp HP, replaces current temp HP. Lost if you doff the armor. 3 uses per long rest.</p>'+
       '<p class="note">Use when you\'re the one standing between an enemy and your squishier friends. Gauntlet hand must be empty'+(state.shield?"; shield stays in the other.":".")+'</p>';
     document.getElementById("m-i").innerHTML=
       '<div class="weapon"><span class="name big">Lightning Launcher</span> <span class="chips"><span class="chip">Range 90/300 ft</span><span class="chip">'+sg(i.atk)+'</span>'+ewTag(i)+'</span></div>'+
@@ -573,6 +573,8 @@ input.amt{width:6em;vertical-align:middle}
   }
   function hasItem(re){ return state.eq.some(function(x){ return x.qty>0&&re.test(x.name); }); }
   function hasSword(){ return hasItem(/shortsword/i); }
+  // Magical Tinkering needs thieves' tools or any artisan's tools (Sol's: smith's, tinker's, alchemist's).
+  function hasTinkerTools(){ return hasItem(/thieves'? tools|artisan's tools|smith's tools|tinker's tools|alchemist's supplies/i); }
   function eqById(id){ return state.eq.filter(function(x){ return x.id===id; })[0]; }
   function renderEq(){
     var h="";
@@ -778,7 +780,7 @@ input.amt{width:6em;vertical-align:middle}
       {id:"shatter",name:"Shatter",tags:["10 ft radius","CON save"],lv:[2],spell:true,leveled:true,card:function(){ return {rows:[["Each creature", d("d20 + its CON save")+vs("your DC 16")],["Fail",'<span class="thunder">'+d("3d8")+" thunder</span>"],["Success","Half damage."]],notes:["Stone, metal or crystal creatures save with disadvantage.","60 ft range. Heard 100 ft away."]}; }},
       {id:"mirror",name:"Mirror Image",tags:["self","2nd level"],lv:[2],spell:true,leveled:true,card:function(){ return {rows:[["Now","No roll. 3 duplicates for 1 min."],["When attacked", d("d20")+' <span class="vs">3 left: 6+ · 2 left: 8+ · 1 left: 11+</span>'],["On success","The attack targets a duplicate (AC 12); a hit destroys it."]],notes:["No concentration. Doesn't help against area spells or attackers with blindsight/truesight."]}; }},
       {id:"hand",name:"Mage Hand",tags:["cantrip","30 ft"],spell:true,card:function(){ return {rows:[["Roll","None."]],notes:["Manipulate an object or open an unlocked door. Carries up to 10 lb, can't attack."]}; }},
-      {id:"tinker",name:"Magical Tinkering",tags:["touch"],card:function(){ return {rows:[["Roll","None."]],notes:["Tiny object: light, recorded message, sound/odor, or static image. Max 5 at once."]}; }},
+      {id:"tinker",name:"Magical Tinkering",tags:["touch"],card:function(){ return {rows:[["Roll","None."]],notes:["Needs thieves' or artisan's tools in hand.","Tiny nonmagical object: light, recorded message, sound/odor, or static image. Max 5 at once."]}; }},
       {id:"dash",name:"Dash",tags:["+"+S()+" ft"],card:function(){ return {rows:[["Movement", d("+"+S()+" ft")+' <span class="vs">'+(S()*2)+" ft total</span>"]],notes:[]}; }},
       {id:"dodge",name:"Dodge",tags:["defense"],card:function(){ return {rows:[["Until your next turn","Attacks against you have disadvantage (if you see the attacker). Your DEX saves have advantage."]],notes:["Lost if you're incapacitated or your speed drops to 0."]}; }},
       {id:"diseng",name:"Disengage",tags:["no OAs"],card:function(){ return {rows:[["This turn","Your movement doesn't provoke opportunity attacks."]],notes:[]}; }},
@@ -789,15 +791,15 @@ input.amt{width:6em;vertical-align:middle}
     atk1:function(){ return atkOpts("atk1"); },
     atk2:function(){ return atkOpts("atk2"); },
     bonus:function(){ return [
-      HS()&&{id:"homu",name:"Command homunculus",tags:["it acts after you"],card:function(){ return {rows:[["Next","Pick its action in the Homunculus step."]],notes:["Without a command it only takes the Dodge action."]}; }},
-      {id:"df",name:"Defensive Field",tags:["Guardian","5 temp HP"],fixed:"df",guardOnly:true,card:function(){ return {rows:[["Roll","None."],["Gain", d("5 temp HP")]],notes:["Replaces any temp HP you have; doesn't stack.","Lasts until a long rest or used up."]}; }},
+      HS()&&{id:"homu",name:"Command homunculus",tags:["it acts after you"],card:function(){ return {rows:[["Next","Pick its action in the Homunculus step."]],notes:["Without a command it only takes the Dodge action, unless you're incapacitated."]}; }},
+      {id:"df",name:"Defensive Field",tags:["Guardian","5 temp HP"],fixed:"df",guardOnly:true,card:function(){ return {rows:[["Roll","None."],["Gain", d("5 temp HP")]],notes:["Replaces any temp HP you have; doesn't stack.","Lasts until used up or a long rest. Lost if you doff the armor."]}; }},
       {id:"misty",name:"Misty Step",tags:["teleport 30 ft"],lv:["free",2],free:"ms",spell:true,leveled:true,card:function(){ return {rows:[["Roll","None."],["Effect","Teleport up to 30 ft to a spot you can see."]],notes:["Escapes grapples and doesn't provoke opportunity attacks.","Your action can only be a cantrip this turn."]}; }},
       {id:"sanct",name:"Sanctuary",tags:["30 ft","WIS save"],lv:[1,2],spell:true,leveled:true,card:function(){ return {rows:[["Attackers roll", d("d20 + WIS save")+vs("your DC 16")],["Fail","Must pick a new target or lose the attack or harmful spell."]],notes:["1 min. Ends if the warded creature attacks, casts at an enemy, or deals damage.","Doesn't stop area effects. Your action can only be a cantrip this turn."]}; }},
       {id:"none",name:"Nothing",tags:[],card:function(){ return {rows:[["Bonus action","Unused."]],notes:[(HS()?"Homunculus will Dodge. ":"")+(M()==="g"?"Consider Defensive Field if you're taking hits.":"")].filter(Boolean)}; }}
     ]; },
     homu:function(){
       var cmd = turn.bonus && turn.bonus.id==="homu";
-      if(!cmd) return [{id:"dodge",name:"Dodge (default)",tags:["not commanded"],card:function(){ return {rows:[["Its turn","Moves (fly 30 ft) and Dodges: attacks against it have disadvantage and its DEX saves (+5) have advantage."],["Evasion","DEX save for half: success = no damage, fail = half."]],notes:["Use your bonus action on it to get Force Strike."]}; }}];
+      if(!cmd) return [{id:"dodge",name:"Dodge (default)",tags:["not commanded"],card:function(){ return {rows:[["Its turn","Moves (fly 30 ft) and Dodges: attacks against it have disadvantage and its DEX saves (+5) have advantage."],["Evasion","DEX save for half: success = no damage, fail = half."]],notes:["Use your bonus action on it to get Force Strike.","If you're incapacitated, it can take any action it chooses instead of Dodging."]}; }}];
       return [
         {id:"strike",name:"Force Strike",tags:["30 ft","+8"],outcome:true,card:function(){ return {rows:[["Roll", d("d20 + 8")+vs("target's AC")],["Hit",'<span class="force">'+d("1d4 + 3")+" force</span>"],["Crit (nat 20)",'<span class="force">'+d("2d4 + 3")+" force</span>"]],notes:["Acts right after your turn. Fly 30 ft, AC 13, HP 11."]}; }},
         {id:"help",name:"Help",tags:["ally advantage"],card:function(){ return {rows:[["Effect","An ally's next attack against a creature within 5 ft of the homunculus has advantage."]],notes:["Fly next to Malakai's or Zephyra's target so their next attack has advantage."]}; }},
@@ -838,6 +840,7 @@ input.amt{width:6em;vertical-align:middle}
   function whyDisabled(slot,o){
     if(o.guardOnly && M()!=="g") return o.id==="oa" ? "Launcher is ranged: no opportunity attacks in Infiltrator." : "Guardian model only.";
     if(o.fixed && left(o.fixed,slot)<=0) return "No uses left.";
+    if(o.id==="tinker" && !hasTinkerTools()) return "Needs thieves' or artisan's tools in your equipment.";
     if(o.lv && !o.lv.some(function(lv){ return lvOk(o,lv,slot); })) return "No spell slots left for this.";
     if(slot==="action" && o.leveled){ var b=turn.bonus&&findOpt("bonus",turn.bonus.id); if(b&&b.leveled) return b.name+" is your bonus action: only a cantrip as your action this turn."; }
     if(slot==="bonus" && o.leveled){ var a=turn.action&&findOpt("action",turn.action.id); if(a&&a.leveled) return a.name+" is your action: no bonus-action spell this turn."; }
