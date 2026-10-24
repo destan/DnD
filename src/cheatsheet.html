@@ -374,6 +374,8 @@ input.amt{width:6em;vertical-align:middle}
       <div class="eff">When hit by acid/cold/fire/lightning/thunder: resistance to it until your next turn; first melee hit next turn +1d6 of that type.</div></div>
     <div class="row"><span class="name">Feather Fall</span><span class="chips"><span class="chip">Reaction</span><span class="chip">60 ft</span></span>
       <div class="eff">Up to 5 falling creatures drop 60 ft/round, no fall damage.</div></div>
+    <div class="row"><span class="name">Alarm</span><span class="chips"><span class="chip">1 min</span><span class="chip">Ritual</span><span class="chip">30 ft, 20 ft cube</span></span>
+      <div class="eff">Ward an area or door for 8 hours. A Tiny or larger creature entering it triggers a mental ping (wakes you) or a 10-second bell. You choose creatures it ignores. Ritual cast: +10 min, no slot.</div></div>
     <div class="row"><span class="name">Detect Magic</span> <span class="chip c">C</span><span class="chips"><span class="chip">Ritual</span><span class="chip">Sense 30 ft</span></span>
       <div class="eff">See magic auras and their school, 10 min.</div></div>
     <div class="row"><span class="name">Identify</span><span class="chips"><span class="chip">Ritual</span><span class="chip">Touch</span></span>
@@ -419,7 +421,7 @@ input.amt{width:6em;vertical-align:middle}
     <li><b>Concentration:</b> Caustic Brew, Faerie Fire and Detect Magic can't run together. Damage forces a CON save (+5), DC 10 or half the damage.</li>
     <li><b>Light crossbow</b> has Loading: only one shot per turn even with Extra Attack. Use the launcher instead.</li>
     <li><b>Ritual Caster</b> spells (Detect Magic, Identify) are ritual-only (+10 min) unless you also prepare them as artificer spells.</li>
-    <li><b>Prepared:</b> you can prepare 7 (INT +5, half level 2); the sheet shows 6, so one slot is open (Alarm?).</li>
+    <li><b>Prepared:</b> you can prepare 7 (INT +5, half level 2), and all 7 are used: Absorb Elements, Alarm, Faerie Fire, Feather Fall, Grease, Sanctuary, Tasha's Caustic Brew. Armorer and Fey Touched spells don't count.</li>
     <li id="acNote"></li>
   </ul>
 
@@ -555,9 +557,10 @@ input.amt{width:6em;vertical-align:middle}
 
   // ---------- equipment ----------
   var EQ_KIND={heal:"Healing potion",use:"Consumable",gear:"Gear"};
-  // Seed = Solethis_5.pdf equipment box (armor and shield live in Loadout). The box is clipped after "belt".
+  // Seed = Solethis_5.pdf "Equipment" form field (armor and shield live in Loadout).
   var EQ_SEED=[["Shortsword",1],["Light crossbow",1],["Crossbow bolts",20],["Smith's tools",1],["Thieves' tools",1],["Tinker's tools",1],
     ["Alchemist's supplies",1],["Dungeoneer's pack",1],["Bedroll",1],["Black ink",1],["Quill",1],["Small knife",1],["Common clothes",1],
+    ["Belt pouch",1],["Pearl (100 gp, Identify component)",1],["Letter from a dead colleague",1],
     ["Gold (gp)",94],["Silver (sp)",1],["Copper (cp)",5]];
   // Seed once, merging by name so edits survive. The first equipment build seeded a guessed list
   // (ids e1..e6); its made-up potion (e1) is dropped if still untouched.

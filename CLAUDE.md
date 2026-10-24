@@ -12,9 +12,19 @@ Single-page D&D 5e cheatsheet + turn simulator for **Solethis "Sol" Starglance**
 ## Commands
 
 ```sh
-npm install          # playwright (pinned to 1.56.1, matches the Chromium preinstalled in Claude Code cloud sessions)
+npm install          # playwright, pinned to 1.56.1 (expects chromium_headless_shell-1194)
 npm run build        # -> dist/index.html
 npm test             # builds, then runs the smoke test
+```
+
+Cloud sessions may preinstall a different Chromium build in `/opt/pw-browsers`, and the network blocks `npx playwright install`. On 2026-10-24 the preinstalled build was 1243. If the test reports a missing executable, point Playwright at the preinstalled build through a scratch folder:
+
+```sh
+PW=<scratch>/pw; B=$(ls -d /opt/pw-browsers/chromium_headless_shell-* | tail -1)
+mkdir -p $PW/chromium_headless_shell-1194/chrome-linux
+ln -sfn $B/chrome-headless-shell-linux64/chrome-headless-shell $PW/chromium_headless_shell-1194/chrome-linux/headless_shell
+touch $PW/chromium_headless_shell-1194/{INSTALLATION_COMPLETE,DEPENDENCIES_VALIDATED}
+PLAYWRIGHT_BROWSERS_PATH=$PW npm test
 ```
 
 ## Publishing
@@ -27,7 +37,8 @@ Republish by passing that URL as `url` to the Artifact tool with `file_path: src
 ## Rules decisions
 
 - **Tasha's (TCE) Armorer**, not the 2025 Eberron: Forge of the Artificer version (5e.tools defaults to the newer one: Thunder Pulse, Dreadnaught). Guardian = Thunder Gauntlets 1d8 thunder; Infiltrator = Lightning Launcher 1d6 lightning + 1d6 once per turn, 90/300.
-- **2014 PHB spells** (e.g. Mirror Image d20 6+/8+/11+). Verified: Mirror Image, Command, Sanctuary (dnd5e.wikidot.com); Caustic Brew, Mind Sliver (TCE), Absorb Elements (XGE) via 5e.tools. Not yet verified against source: Thunderwave, Shatter, Grease, Faerie Fire, Magic Missile, Misty Step, Feather Fall, Mage Hand.
+- **2014 PHB spells** (e.g. Mirror Image d20 6+/8+/11+). Verified: Mirror Image, Command, Sanctuary (dnd5e.wikidot.com); Caustic Brew, Mind Sliver (TCE), Absorb Elements (XGE) via 5e.tools. Not yet verified against source: Thunderwave, Shatter, Grease, Faerie Fire, Magic Missile, Misty Step, Feather Fall, Mage Hand, Alarm.
+- Prepared artificer spells: 7 of 7 (Absorb Elements, Alarm, Faerie Fire, Feather Fall, Grease, Sanctuary, Tasha's Caustic Brew). Armorer and Fey Touched spells don't count toward the limit.
 - Homunculus Servant stats from 5e.tools TCE bestiary: AC 13, HP 1+INT+level = 11, walk 20 / fly 30, DEX save +5, Stealth +5, Perception +6, Force Strike = spell attack (+8), 1d4+PB force, 30 ft.
 - Enhanced Weapon on the armor's weapons is a DM call; the UI allows gauntlets, launcher or shortsword.
 - Sheet numbers: spell DC 16, spell attack +8, PB +3, CON save +5, Stealth +5, Athletics −1, shortsword +5 1d6+2, base AC 18 (scale 14 + DEX 2 + shield 2).
@@ -44,5 +55,5 @@ Republish by passing that URL as `url` to the Artifact tool with `file_path: src
 - `state` persisted in `localStorage["sol-sheet-v1"]` (per device): `model`, `inf[]`, `ew`, `shield`, `used{}` (resource pips), `round`, `conc`, `fx[]` (ongoing effects), `hp{cur,max,temp}`, `hhp`, `eq[]` (equipment `{id,name,qty,kind:gear|heal|use,detail}`), `eqSeeded` (sheet items merged in once, by name).
 - Loadout: `INF`, `W()`, `renderLoadout()`; tracker: `refreshRes()`, `renderTrack()`; HP: `renderHP()`, `damage()`.
 - Simulator: `OPTS[slot]()` option factories, `SLOTS` (with `when`), `whyDisabled()`, `sim()`, `renderSummary()`, `endTurn()`.
-- Equipment: `renderEq()`, `eqEdit()`/`eqDone()` (editing reuses the add form), `hasItem(re)` (smith's tools warning in the model note; `hasSword()` gates the Shortsword attack and Enhanced Weapon choice); `itemOpts()` adds one action option per heal/use item with qty > 0; `endTurn()` decrements it and applies a self-heal roll (`turn.action.who/amt`). Seed inventory = the sheet's equipment box (clipped after "belt"; the PDF is image-only, no text layer).
+- Equipment: `renderEq()`, `eqEdit()`/`eqDone()` (editing reuses the add form), `hasItem(re)` (smith's tools warning in the model note; `hasSword()` gates the Shortsword attack and Enhanced Weapon choice); `itemOpts()` adds one action option per heal/use item with qty > 0; `endTurn()` decrements it and applies a self-heal roll (`turn.action.who/amt`). Seed inventory = the sheet's "Equipment" form field. The PDF is a fillable form: read its filled fields with pypdf (`PdfReader(path).get_fields()`), not as page text. `eqSeeded` blocks re-seeding, so items added to `EQ_SEED` later reach only devices with no saved state.
 - Ongoing effects: `LAST[optionId](lv)` → `{len, text, acid, dice}`; created in `endTurn()`, pruned when `state.round > until`; `dropConc()` clears concentration effects.
