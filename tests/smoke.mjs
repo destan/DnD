@@ -15,6 +15,15 @@ await page.goto(url);
 assert.equal(await page.textContent("#ac"), "18");
 await page.click("#infToggles button:nth-child(1)"); // Enhanced Defense on (HS already on => 2/2)
 assert.equal(await page.textContent("#ac"), "19");
+// With the homunculus, Enhanced Defense can go on the armor or the shield; on the shield it needs the shield carried
+await page.click('#edSeg button:has-text("Shield")');
+await page.click('#shSeg button:has-text("None")');
+assert.equal(await page.textContent("#ac"), "16");
+assert.match(await page.textContent("#edMsg"), /adds nothing to AC/);
+await page.click('#edSeg button:has-text("Armor")');
+assert.equal(await page.textContent("#ac"), "17");
+await page.click("#shSeg button:nth-child(1)");
+assert.equal(await page.textContent("#ac"), "19");
 await page.click("#infToggles button:nth-child(3)"); // Homunculus off
 const steps = await page.$$eval("#simSteps button", (b) => b.map((x) => x.firstChild.textContent));
 assert.ok(!steps.includes("Homunculus"));
@@ -22,6 +31,13 @@ assert.ok(!steps.includes("Homunculus"));
 // Enhanced Weapon on gauntlets => +9 / 1d8 + 6
 await page.click("#infToggles button:nth-child(2)");
 await page.click("#ewSeg button:nth-child(1)");
+// Enhanced Weapon on the gauntlets occupies the armor, so Enhanced Defense is forced onto the shield
+assert.match(await page.textContent("#edMsg"), /armor holds Enhanced Weapon \(Thunder Gauntlets\)/);
+assert.equal(await page.isDisabled('#edSeg button:has-text("Armor")'), true);
+await page.click('#shSeg button:has-text("None")');
+assert.equal(await page.textContent("#ac"), "16");
+await page.click("#shSeg button:nth-child(1)");
+assert.equal(await page.textContent("#ac"), "19");
 await page.click("#simNext");
 await page.click('.opt[data-o="attack"]');
 await page.click("#simNext");
@@ -107,6 +123,20 @@ assert.equal(await page.isHidden("#simFx"), true);
 assert.equal(await page.textContent("#simConc"), "");
 assert.equal(await page.textContent("#simRound"), "Round 1");
 
+// Mind Sharpener and Enhanced Weapon on the gauntlets can't share the armor
+await page.click("#infToggles button:nth-child(1)"); // Enhanced Defense off (Enhanced Weapon on gauntlets stays)
+assert.equal(await page.isDisabled("#infToggles button:nth-child(4)"), true);
+assert.match(await page.textContent("#infToggles button:nth-child(4)"), /Armor holds Enhanced Weapon/);
+await page.click("#infToggles button:nth-child(2)"); // Enhanced Weapon off
+await page.click("#infToggles button:nth-child(4)"); // Mind Sharpener on
+assert.match(await page.textContent("#infToggles button:nth-child(2)"), /no shortsword/);
+await page.fill("#eqName", "Shortsword"); await page.fill("#eqQty", "1");
+await page.selectOption("#eqKind", "gear"); await page.click("#eqAdd button[type=submit]");
+await page.click("#infToggles button:nth-child(2)"); // Enhanced Weapon on: lands on the shortsword
+assert.equal(await page.getAttribute('#ewSeg button:has-text("Shortsword")', "aria-pressed"), "true");
+assert.equal(await page.isDisabled('#ewSeg button:has-text("Gauntlets")'), true);
+assert.match(await page.textContent("#ewSeg"), /Armor holds Mind Sharpener/);
+
 // Migration from the first equipment build: untouched guessed potion dropped, edits kept, sheet items merged in
 await page.evaluate(() => localStorage.setItem("sol-sheet-v1", JSON.stringify({ eq: [
   { id: "e1", name: "Potion of healing", qty: 1, kind: "heal", detail: "2d4 + 2" },
@@ -120,6 +150,11 @@ assert.match(inv, /Crossbow bolts−7\+/);
 assert.match(inv, /Rope/);
 assert.match(inv, /Bedroll/);
 assert.equal(inv.match(/Smith's tools/g).length, 1);
+
+// A saved state from before the one-infusion-per-object rule shows the conflict
+await page.evaluate(() => localStorage.setItem("sol-sheet-v1", JSON.stringify({ inf: ["ms", "ew"], ew: "g" })));
+await page.reload();
+assert.match(await page.textContent("#ewMsg"), /both on the armor/);
 
 assert.deepEqual(errors, []);
 await browser.close();

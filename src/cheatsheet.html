@@ -127,6 +127,11 @@ li{margin-bottom:6px}
 .chip.on{background:var(--verd);color:var(--panel)}
 .chip.off{background:none;border:1px solid var(--line);color:var(--muted)}
 .row.inactive .name,.row.inactive .eff{opacity:.55}
+.lrow button .whyin{display:block;font-weight:400;font-size:.72rem;color:var(--warn)}
+.lrow button.blocked:disabled{opacity:.7}
+.lmsg{grid-column:1/-1;margin:0;font-size:.85rem;color:var(--muted)}
+.lmsg:empty{display:none}
+.lmsg b{color:var(--warn)}
 /* ---------- turn simulator ---------- */
 .sim{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:clip}
 .simhead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
@@ -308,7 +313,11 @@ input.amt{width:6em;vertical-align:middle}
     <div class="lrow"><span class="llab">Active infusions <span class="cnt" id="infCount"></span></span>
       <div class="toggles" id="infToggles" role="group" aria-label="Active infusions"></div></div>
     <div class="lrow" id="ewRow"><span class="llab">Enhanced Weapon is on</span>
-      <div class="seg" id="ewSeg" role="group" aria-label="Enhanced Weapon target"></div></div>
+      <div class="seg" id="ewSeg" role="group" aria-label="Enhanced Weapon target"></div>
+      <p class="lmsg" id="ewMsg" aria-live="polite"></p></div>
+    <div class="lrow" id="edRow"><span class="llab">Enhanced Defense is on</span>
+      <div class="seg" id="edSeg" role="group" aria-label="Enhanced Defense target"></div>
+      <p class="lmsg" id="edMsg" aria-live="polite"></p></div>
     <div class="lrow"><span class="llab">Shield</span>
       <div class="seg" id="shSeg" role="group" aria-label="Shield"></div></div>
   </div>
@@ -469,7 +478,15 @@ input.amt{width:6em;vertical-align:middle}
   function on(id){ return state.inf.indexOf(id)>=0; }
   function HS(){ return on("hs"); }
   function MSH(){ return on("ms"); }
-  function AC(){ return 14+2+(state.shield?2:0)+(on("ed")?1:0); }
+  // An object can bear only one infusion (TCE Infuse Item). Mind Sharpener sits on the armor (Sol has no robes).
+  // Enhanced Weapon on the gauntlets or launcher sits on the armor too (DM call: the armor's weapons are the armor).
+  function ewOnArmor(){ return on("ew")&&state.ew!=="s"; }
+  function armorHolder(){ return on("ms") ? "Mind Sharpener" : (ewOnArmor() ? "Enhanced Weapon ("+WBASE[state.ew].name+")" : null); }
+  function infConflict(){ return on("ms")&&ewOnArmor(); }
+  // Enhanced Defense target: "a" armor or "s" shield. Forced onto the shield when the armor holds another infusion.
+  function edOn(){ return armorHolder() ? "s" : (state.edOn==="s" ? "s" : "a"); }
+  function edAC(){ return on("ed")&&(edOn()==="a"||state.shield) ? 1 : 0; }
+  function AC(){ return 14+2+(state.shield?2:0)+edAC(); }
   var WBASE={g:{name:"Thunder Gauntlets",atk:8,dmg:5,n:1,die:"d8",type:"thunder"},
              i:{name:"Lightning Launcher",atk:8,dmg:5,n:1,die:"d6",type:"lightning"},
              s:{name:"Shortsword",atk:5,dmg:2,n:1,die:"d6",type:"piercing"}};
@@ -494,10 +511,16 @@ input.amt{width:6em;vertical-align:middle}
     // infusion toggles
     var full=state.inf.length>=INF_MAX, tg=document.getElementById("infToggles"); tg.innerHTML="";
     INF.forEach(function(f){
-      var b=document.createElement("button"); b.type="button"; b.textContent=f.name;
-      var act=on(f.id); b.setAttribute("aria-pressed",act?"true":"false");
+      var b=document.createElement("button"); b.type="button";
+      var act=on(f.id), why=null; b.setAttribute("aria-pressed",act?"true":"false");
       if(!act&&full){ b.disabled=true; b.title="Two infusions already active. Turn one off first."; }
-      b.onclick=function(){ if(on(f.id)) state.inf=state.inf.filter(function(x){ return x!==f.id; }); else if(state.inf.length<INF_MAX) state.inf.push(f.id); save(); refresh(); };
+      else if(!act&&f.id==="ms"&&ewOnArmor()) why="Armor holds Enhanced Weapon";
+      else if(!act&&f.id==="ew"&&on("ms")&&!hasSword()) why="Armor holds Mind Sharpener, no shortsword";
+      blockBtn(b,f.name,why);
+      b.onclick=function(){
+        if(on(f.id)) state.inf=state.inf.filter(function(x){ return x!==f.id; });
+        else if(state.inf.length<INF_MAX){ state.inf.push(f.id); if(f.id==="ew"&&on("ms")) state.ew="s"; }
+        save(); refresh(); };
       tg.appendChild(b);
     });
     document.getElementById("infCount").textContent=state.inf.length+" of "+INF_MAX+" active";
@@ -506,12 +529,31 @@ input.amt{width:6em;vertical-align:middle}
     var ewSeg=document.getElementById("ewSeg"); ewSeg.innerHTML="";
     [["g","Gauntlets"],["i","Launcher"],["s","Shortsword"]].forEach(function(o){
       if(o[0]==="s" && !hasSword() && state.ew!=="s") return;
-      var b=document.createElement("button"); b.type="button"; b.textContent=o[1];
+      var b=document.createElement("button"); b.type="button";
       b.setAttribute("aria-pressed",state.ew===o[0]?"true":"false");
+      blockBtn(b,o[1],o[0]!=="s"&&on("ms")&&state.ew!==o[0] ? "Armor holds Mind Sharpener" : null);
       b.onclick=function(){ state.ew=o[0]; save(); refresh(); }; ewSeg.appendChild(b);
     });
+    document.getElementById("ewMsg").innerHTML = infConflict()
+      ? '<b>Mind Sharpener and Enhanced Weapon are both on the armor.</b> An object can hold only one infusion. '+(hasSword()?"Move Enhanced Weapon to the shortsword, or turn one off.":"Turn one of them off.")
+      : (on("ms") ? "Gauntlets and launcher are part of the armor, which holds Mind Sharpener. An object can hold only one infusion." : "");
+
+    var ed=edOn(), holder=armorHolder();
+    document.getElementById("edRow").hidden=!on("ed");
+    var edSeg=document.getElementById("edSeg"); edSeg.innerHTML="";
+    [["a","Armor"],["s","Shield"]].forEach(function(o){
+      var b=document.createElement("button"); b.type="button";
+      b.setAttribute("aria-pressed",ed===o[0]?"true":"false");
+      blockBtn(b,o[1],o[0]==="a"&&holder ? "Holds "+holder.replace(/ \(.*/,"") : null);
+      b.onclick=function(){ state.edOn=o[0]; save(); refresh(); }; edSeg.appendChild(b);
+    });
+    var edMsg=[];
+    if(holder) edMsg.push("On the shield: the armor holds "+e_(holder)+", and an object can hold only one infusion.");
+    if(ed==="s"&&!state.shield) edMsg.push("<b>You carry no shield, so Enhanced Defense adds nothing to AC.</b>");
+    document.getElementById("edMsg").innerHTML=edMsg.join(" ");
+
     var shSeg=document.getElementById("shSeg"); shSeg.innerHTML="";
-    [[true,"Carried (+2 AC)"],[false,"None"]].forEach(function(o){
+    [[true,"Carried (+"+(on("ed")&&ed==="s"?"3 AC with Enhanced Defense":"2 AC")+")"],[false,"None"]].forEach(function(o){
       var b=document.createElement("button"); b.type="button"; b.textContent=o[1];
       b.setAttribute("aria-pressed",state.shield===o[0]?"true":"false");
       b.onclick=function(){ state.shield=o[0]; save(); refresh(); }; shSeg.appendChild(b);
@@ -546,13 +588,19 @@ input.amt{width:6em;vertical-align:middle}
     var il=document.getElementById("infList"); il.innerHTML="";
     INF.forEach(function(f){
       var act=on(f.id), extra="";
-      if(f.id==="ew"&&act) extra=" Currently on: "+W(state.ew).name+"."+(state.ew==="s"&&!hasSword()?" The shortsword isn't in your equipment.":"");
+      if(f.id==="ew"&&act) extra=" Currently on: "+W(state.ew).name+"."+(state.ew==="s"&&!hasSword()?" The shortsword isn't in your equipment.":"")+(infConflict()?" Conflict: the armor also holds Mind Sharpener.":"");
+      if(f.id==="ed"&&act) extra=" Currently on: the "+(ed==="s"?"shield":"armor")+"."+(edAC()?"":" You carry no shield, so no +1 AC.");
       il.insertAdjacentHTML("beforeend",'<div class="row'+(act?"":" inactive")+'"><span class="name">'+e_(f.name)+'</span> <span class="chips"><span class="chip '+(act?"on":"off")+'">'+(act?"Active":"Known")+'</span></span><div class="eff">'+e_(f.desc+extra)+'</div></div>');
     });
 
     document.getElementById("modelNote").innerHTML="Armor is your spellcasting focus and can't be removed against your will. Switching model needs smith's tools in hand."+(hasItem(/smith/i)?"":' <span class="warn">No smith\'s tools in your equipment.</span>');
 
-    document.getElementById("acNote").innerHTML='<b>AC '+AC()+'</b> = scale mail 14 + DEX 2'+(state.shield?" + shield 2":"")+(on("ed")?" + Enhanced Defense 1":"")+'. The printed sheet says 18.';
+    document.getElementById("acNote").innerHTML='<b>AC '+AC()+'</b> = scale mail 14 + DEX 2'+(state.shield?" + shield 2":"")+(edAC()?" + Enhanced Defense 1":"")+'.'+(on("ed")&&!edAC()?" Enhanced Defense is on the shield, which you don't carry.":"")+' The printed sheet says 18.';
+  }
+  // Disabled-by-rule buttons show the reason inside the button.
+  function blockBtn(b,label,why){
+    b.innerHTML=e_(label)+(why?'<small class="whyin">'+e_(why)+'</small>':"");
+    if(why){ b.disabled=true; b.classList.add("blocked"); }
   }
 
   // ---------- equipment ----------

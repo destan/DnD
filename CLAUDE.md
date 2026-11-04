@@ -40,7 +40,8 @@ Republish by passing that URL as `url` to the Artifact tool with `file_path: src
 - **2014 PHB spells** (e.g. Mirror Image d20 6+/8+/11+). Verified: Mirror Image, Command, Sanctuary (dnd5e.wikidot.com); Caustic Brew, Mind Sliver (TCE), Absorb Elements (XGE) via 5e.tools. Not yet verified against source: Thunderwave, Shatter, Grease, Faerie Fire, Magic Missile, Misty Step, Feather Fall, Mage Hand, Alarm.
 - Prepared artificer spells: 7 of 7 (Absorb Elements, Alarm, Faerie Fire, Feather Fall, Grease, Sanctuary, Tasha's Caustic Brew). Armorer and Fey Touched spells don't count toward the limit.
 - Homunculus Servant stats from 5e.tools TCE bestiary: AC 13, HP 1+INT+level = 11, walk 20 / fly 30, DEX save +5, Stealth +5, Perception +6, Force Strike = spell attack (+8), 1d4+PB force, 30 ft.
-- Enhanced Weapon on the armor's weapons is a DM call; the UI allows gauntlets, launcher or shortsword.
+- Enhanced Weapon on the armor's weapons is a DM call; the UI allows gauntlets, launcher or shortsword. The UI treats the armor's weapons as the armor itself.
+- One infusion per object (TCE Infuse Item, not yet verified against source). Mind Sharpener sits on the armor (Sol has no robes). So Mind Sharpener blocks Enhanced Weapon on the gauntlets or launcher, and either of them forces Enhanced Defense onto the shield (+1 AC only while the shield is carried). Otherwise the user picks armor or shield for Enhanced Defense.
 - Sheet numbers: spell DC 16, spell attack +8, PB +3, CON save +5, Stealth +5, Athletics −1, shortsword +5 1d6+2, base AC 18 (scale 14 + DEX 2 + shield 2).
 
 ## Design principles (from the user)
@@ -52,8 +53,8 @@ Republish by passing that URL as `url` to the Artifact tool with `file_path: src
 
 ## Code map (inside the `<script>`)
 
-- `state` persisted in `localStorage["sol-sheet-v1"]` (per device): `model`, `inf[]`, `ew`, `shield`, `used{}` (resource pips), `round`, `conc`, `fx[]` (ongoing effects), `hp{cur,max,temp}`, `hhp`, `eq[]` (equipment `{id,name,qty,kind:gear|heal|use,detail}`), `eqSeeded` (sheet items merged in once, by name).
-- Loadout: `INF`, `W()`, `renderLoadout()`; tracker: `refreshRes()`, `renderTrack()`; HP: `renderHP()`, `damage()`.
+- `state` persisted in `localStorage["sol-sheet-v1"]` (per device): `model`, `inf[]`, `ew`, `edOn` (Enhanced Defense target `a`|`s`, user choice), `shield`, `used{}` (resource pips), `round`, `conc`, `fx[]` (ongoing effects), `hp{cur,max,temp}`, `hhp`, `eq[]` (equipment `{id,name,qty,kind:gear|heal|use,detail}`), `eqSeeded` (sheet items merged in once, by name).
+- Loadout: `INF`, `W()`, `armorHolder()`/`edOn()`/`edAC()`/`infConflict()` (one infusion per object), `blockBtn()` (reason inside a disabled button), `renderLoadout()`; tracker: `refreshRes()`, `renderTrack()`; HP: `renderHP()`, `damage()`.
 - Simulator: `OPTS[slot]()` option factories, `SLOTS` (with `when`), `whyDisabled()`, `sim()`, `renderSummary()`, `endTurn()`.
 - Equipment: `renderEq()`, `eqEdit()`/`eqDone()` (editing reuses the add form), `hasItem(re)` (smith's tools warning in the model note; `hasSword()` gates the Shortsword attack and Enhanced Weapon choice); `itemOpts()` adds one action option per heal/use item with qty > 0; `endTurn()` decrements it and applies a self-heal roll (`turn.action.who/amt`). Seed inventory = the sheet's "Equipment" form field. The PDF is a fillable form: read its filled fields with pypdf (`PdfReader(path).get_fields()`), not as page text. `eqSeeded` blocks re-seeding, so items added to `EQ_SEED` later reach only devices with no saved state.
 - Ongoing effects: `LAST[optionId](lv)` → `{len, text, acid, dice}`; created in `endTurn()`, pruned when `state.round > until`; `dropConc()` clears concentration effects.
