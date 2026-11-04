@@ -123,6 +123,15 @@ assert.equal(await page.isHidden("#simFx"), true);
 assert.equal(await page.textContent("#simConc"), "");
 assert.equal(await page.textContent("#simRound"), "Round 1");
 
+// Damage at 0 HP: a death save failure, or instant death when it reaches the HP max
+await page.fill("#hpCur", "0"); await page.dispatchEvent("#hpCur", "change");
+await page.fill("#hpAmt", "5"); await page.click("#hpDmg");
+assert.match(await page.textContent("#hpMsg"), /one death save failure/);
+await page.fill("#hpCur", "10"); await page.dispatchEvent("#hpCur", "change");
+await page.fill("#hpAmt", "48"); await page.click("#hpDmg");
+assert.match(await page.textContent("#hpMsg"), /Instant death: 38 damage left after 0 HP/);
+await page.click("#reset");
+
 // Mind Sharpener and Enhanced Weapon on the gauntlets can't share the armor
 await page.click("#infToggles button:nth-child(1)"); // Enhanced Defense off (Enhanced Weapon on gauntlets stays)
 assert.equal(await page.isDisabled("#infToggles button:nth-child(4)"), true);

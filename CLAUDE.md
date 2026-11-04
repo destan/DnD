@@ -36,12 +36,20 @@ Republish by passing that URL as `url` to the Artifact tool with `file_path: src
 
 ## Rules decisions
 
+**Always verify a rule against its source text before you add or change it.** Never write a rule from memory. Sources:
+
+- Class, subclass, infusions, spells, feats, lineages: dnd5e.wikidot.com (`artificer`, `artificer:armorer`, `artificer:infusions`, `spell:<name>`, `feat:<name>`, `lineage:elf`).
+- Combat, actions, conditions, hiding, spellcasting, equipment (2014): D&D Beyond Basic Rules 2014, `https://www.dndbeyond.com/sources/dnd/basic-rules-2014/<chapter>` (`combat`, `spellcasting`, `equipment`, `using-ability-scores`, `appendix-a-conditions`).
+- Fetch the page and read the rule's text. A summary from memory or a search snippet doesn't count. If the source is unreachable, mark the rule "not yet verified" here and tell the user.
+
+On 2026-11-04 every rule in the app was checked against these sources.
+
 - **Tasha's (TCE) Armorer**, not the 2025 Eberron: Forge of the Artificer version (5e.tools defaults to the newer one: Thunder Pulse, Dreadnaught). Guardian = Thunder Gauntlets 1d8 thunder; Infiltrator = Lightning Launcher 1d6 lightning + 1d6 once per turn, 90/300.
-- **2014 PHB spells** (e.g. Mirror Image d20 6+/8+/11+). Verified: Mirror Image, Command, Sanctuary (dnd5e.wikidot.com); Caustic Brew, Mind Sliver (TCE), Absorb Elements (XGE) via 5e.tools. Not yet verified against source: Thunderwave, Shatter, Grease, Faerie Fire, Magic Missile, Misty Step, Feather Fall, Mage Hand, Alarm.
+- **2014 PHB spells** (e.g. Mirror Image d20 6+/8+/11+). All spells in the app are verified on dnd5e.wikidot.com.
 - Prepared artificer spells: 7 of 7 (Absorb Elements, Alarm, Faerie Fire, Feather Fall, Grease, Sanctuary, Tasha's Caustic Brew). Armorer and Fey Touched spells don't count toward the limit.
-- Homunculus Servant stats from 5e.tools TCE bestiary: AC 13, HP 1+INT+level = 11, walk 20 / fly 30, DEX save +5, Stealth +5, Perception +6, Force Strike = spell attack (+8), 1d4+PB force, 30 ft.
-- Enhanced Weapon on the armor's weapons is a DM call; the UI allows gauntlets, launcher or shortsword. The UI treats the armor's weapons as the armor itself.
-- One infusion per object (TCE Infuse Item, not yet verified against source). Mind Sharpener sits on the armor (Sol has no robes). So Mind Sharpener blocks Enhanced Weapon on the gauntlets or launcher, and either of them forces Enhanced Defense onto the shield (+1 AC only while the shield is carried). Otherwise the user picks armor or shield for Enhanced Defense.
+- Homunculus Servant (`artificer:infusions`): AC 13, HP 1+INT+level = 11, walk 20 / fly 30, DEX save +5, Stealth +5, Perception +6, Force Strike = ranged weapon attack with your spell attack (+8), 1d4+PB force, 30 ft.
+- Enhanced Weapon on the armor's weapons is a DM call; the UI allows gauntlets, launcher or shortsword. The UI treats the armor's weapons as the armor itself: Armor Modifications (9th level) is the feature that makes the special weapon a separate item.
+- One infusion per object (Infuse Item: "no object can bear more than one of your infusions at a time"). Mind Sharpener sits on the armor (Sol has no robes). So Mind Sharpener blocks Enhanced Weapon on the gauntlets or launcher, and either of them forces Enhanced Defense onto the shield (+1 AC only while the shield is carried). Otherwise the user picks armor or shield for Enhanced Defense.
 - Sheet numbers: spell DC 16, spell attack +8, PB +3, CON save +5, Stealth +5, Athletics −1, shortsword +5 1d6+2, base AC 18 (scale 14 + DEX 2 + shield 2).
 
 ## Design principles (from the user)

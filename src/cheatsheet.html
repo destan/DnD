@@ -372,19 +372,19 @@ input.amt{width:6em;vertical-align:middle}
     <div class="row"><span class="name">Tasha's Caustic Brew</span> <span class="chip c">C</span><span class="chips"><span class="chip">Action</span><span class="chip">30×5 ft line</span><span class="chip">DEX save</span></span>
       <div class="eff"><span class="acid">2d4 acid</span> at the start of each of their turns until someone uses an action to scrape it off. +2d4 per slot above.</div></div>
     <div class="row"><span class="name">Faerie Fire</span> <span class="chip c">C</span><span class="chips"><span class="chip">Action</span><span class="chip">60 ft, 20 ft cube</span><span class="chip">DEX save</span></span>
-      <div class="eff">Outlined creatures: attacks against them have advantage, can't be invisible. 1 min.</div></div>
+      <div class="eff">Outlined creatures: attacks against them have advantage if the attacker can see them; they can't be invisible. 1 min.</div></div>
     <div class="row"><span class="name">Grease</span><span class="chips"><span class="chip">Action</span><span class="chip">60 ft, 10 ft square</span><span class="chip">DEX save</span></span>
       <div class="eff">Fall prone on fail (also when entering or ending turn there). Difficult terrain, 1 min, no concentration.</div></div>
     <div class="row"><span class="name">Command</span><span class="chips"><span class="chip">Action</span><span class="chip">60 ft</span><span class="chip">WIS save</span></span>
       <div class="eff">One word for their next turn: approach, drop, flee, grovel, halt. Not vs. undead. 1 free cast per long rest (Fey Touched).</div></div>
     <div class="row"><span class="name">Sanctuary</span><span class="chips"><span class="chip">Bonus</span><span class="chip">30 ft</span></span>
-      <div class="eff">Attackers must pass a WIS save or pick another target. Ends if the warded creature attacks or casts at an enemy. Doesn't stop area damage.</div></div>
+      <div class="eff">Attackers must pass a WIS save or pick another target. Ends if the warded creature attacks, casts a spell that affects an enemy, or deals damage. Doesn't stop area damage.</div></div>
     <div class="row"><span class="name">Absorb Elements</span><span class="chips"><span class="chip">Reaction</span><span class="chip">Self</span></span>
       <div class="eff">When hit by acid/cold/fire/lightning/thunder: resistance to it until your next turn; first melee hit next turn +1d6 of that type.</div></div>
     <div class="row"><span class="name">Feather Fall</span><span class="chips"><span class="chip">Reaction</span><span class="chip">60 ft</span></span>
       <div class="eff">Up to 5 falling creatures drop 60 ft/round, no fall damage.</div></div>
     <div class="row"><span class="name">Alarm</span><span class="chips"><span class="chip">1 min</span><span class="chip">Ritual</span><span class="chip">30 ft, 20 ft cube</span></span>
-      <div class="eff">Ward an area or door for 8 hours. A Tiny or larger creature entering it triggers a mental ping (wakes you) or a 10-second bell. You choose creatures it ignores. Ritual cast: +10 min, no slot.</div></div>
+      <div class="eff">Ward a door, window or area for 8 hours. A Tiny or larger creature touching or entering it triggers a mental ping (within 1 mile, wakes you) or a hand bell for 10 seconds (heard 60 ft). You choose creatures it ignores. Ritual cast: +10 min, no slot.</div></div>
     <div class="row"><span class="name">Detect Magic</span> <span class="chip c">C</span><span class="chips"><span class="chip">Ritual</span><span class="chip">Sense 30 ft</span></span>
       <div class="eff">See magic auras and their school, 10 min.</div></div>
     <div class="row"><span class="name">Identify</span><span class="chips"><span class="chip">Ritual</span><span class="chip">Touch</span></span>
@@ -404,7 +404,7 @@ input.amt{width:6em;vertical-align:middle}
   <div id="homuSec">
   <h2>Homunculus servant</h2>
   <div class="rows">
-    <div class="row"><span class="name">Stats</span><div class="eff">HP 11 (1 + INT 5 + level 5), AC 13, walk 20 ft, fly 30 ft. DEX save +5, Stealth +5, Perception +6 (passive 16), darkvision 60 ft. Evasion; immune to poison. Shares your initiative and takes its turn right after yours. <i>Mending</i> heals it 2d6.</div></div>
+    <div class="row"><span class="name">Stats</span><div class="eff">HP 11 (1 + INT 5 + level 5), AC 13, walk 20 ft, fly 30 ft. DEX save +5, Stealth +5, Perception +6 (passive 16), darkvision 60 ft. Evasion; immune to poison damage, exhaustion and the poisoned condition. Shares your initiative and takes its turn right after yours. <i>Mending</i> heals it 2d6.</div></div>
     <div class="row"><span class="name">Force Strike</span><span class="chips"><span class="chip">Your bonus action</span><span class="chip">30 ft</span><span class="chip">+8</span></span>
       <div class="eff"><span class="force">1d4+3 force</span>. If you don't command it, it just Dodges. If you're incapacitated, it can take any action it chooses.</div></div>
     <div class="row"><span class="name">Channel Magic</span><span class="chips"><span class="chip">Its reaction</span><span class="chip">120 ft</span></span>
@@ -417,7 +417,7 @@ input.amt{width:6em;vertical-align:middle}
 
   <h2>Utility</h2>
   <ul>
-    <li><b>Magical Tinkering</b> (action, thieves' or artisan's tools in hand, touch a Tiny nonmagical object): dim light 5 ft, a 6-second recorded message, an odor or sound, or a static image. Max 5 at once.</li>
+    <li><b>Magical Tinkering</b> (action, thieves' or artisan's tools in hand, touch a Tiny nonmagical object): bright light 5 ft and dim light 5 ft beyond, a 6-second recorded message, an odor or sound, or a static image. Max 5 at once.</li>
     <li><b>Right Tool for the Job:</b> 1 hour with thieves' or artisan's tools makes one set of artisan's tools.</li>
     <li><b>Elf:</b> advantage vs. charm, immune to magical sleep, 4-hour trance.</li>
   </ul>
@@ -428,8 +428,8 @@ input.amt{width:6em;vertical-align:middle}
     <li><b>Faerie Fire</b> before the party's attack round gives everyone advantage.</li>
     <li><b>Bonus action spell rule:</b> cast Misty Step or Sanctuary and your only other spell that turn can be a 1-action cantrip.</li>
     <li><b>Concentration:</b> Caustic Brew, Faerie Fire and Detect Magic can't run together. Damage forces a CON save (+5), DC 10 or half the damage.</li>
-    <li><b>Light crossbow</b> has Loading: only one shot per turn even with Extra Attack. Use the launcher instead.</li>
-    <li><b>Ritual Caster</b> spells (Detect Magic, Identify) are ritual-only (+10 min) unless you also prepare them as artificer spells.</li>
+    <li><b>Light crossbow</b> has Loading: only one shot per turn even with Extra Attack. It is also two-handed, so not with your shield. Use the launcher instead.</li>
+    <li><b>Ritual Caster</b> spells (Detect Magic, Identify) are ritual-only (+10 min, ritual book in hand) unless you also prepare them as artificer spells.</li>
     <li><b>Prepared:</b> you can prepare 7 (INT +5, half level 2), and all 7 are used: Absorb Elements, Alarm, Faerie Fire, Feather Fall, Grease, Sanctuary, Tasha's Caustic Brew. Armorer and Fey Touched spells don't count.</li>
     <li id="acNote"></li>
   </ul>
@@ -572,7 +572,7 @@ input.amt{width:6em;vertical-align:middle}
       '<div class="weapon"><span class="name big">Lightning Launcher</span> <span class="chips"><span class="chip">Range 90/300 ft</span><span class="chip">'+sg(i.atk)+'</span>'+ewTag(i)+'</span></div>'+
       '<p><span class="lightning">1d6'+sg(i.dmg)+' lightning</span>, two attacks per Attack action; once per turn a hit adds <span class="lightning">+1d6</span> (≈'+Math.round(2*(3.5+i.dmg)+3.5)+' dmg if both hit).</p>'+
       '<p><b>Powered Steps:</b> speed 35 ft. <b>Dampening Field:</b> advantage on Stealth, which cancels scale mail\'s disadvantage (roll normally).</p>'+
-      '<p class="note">Disadvantage if a hostile creature is within 5 ft of you, or beyond 90 ft. Shortsword for close range: '+sg(sw.atk)+', 1d6'+sg(sw.dmg)+' piercing'+(sw.plus?" (Enhanced)":"")+'; drawing it is your free object interaction.</p>';
+      '<p class="note">Disadvantage if a hostile creature that can see you and isn\'t incapacitated is within 5 ft of you, or beyond 90 ft. Shortsword for close range: '+sg(sw.atk)+', 1d6'+sg(sw.dmg)+' piercing'+(sw.plus?" (Enhanced)":"")+'; drawing it is your free object interaction.</p>';
 
     // turn list
     var bonus=["Defensive Field (Guardian)"]; if(HS()) bonus.push("command the homunculus"); bonus.push("Misty Step","Sanctuary");
@@ -715,17 +715,23 @@ input.amt{width:6em;vertical-align:middle}
   }
   function hpSay(t){ $("hpMsg").innerHTML=t; }
   function damage(n){
-    var h=state.hp, fromTemp=Math.min(h.temp,n), rest=n-fromTemp, parts=[];
+    var h=state.hp, was=h.cur, fromTemp=Math.min(h.temp,n), rest=n-fromTemp, parts=[];
     h.temp-=fromTemp; h.cur=Math.max(0,h.cur-rest);
+    // Instant death when the damage left after reaching 0 HP is at least the HP max (2014 PHB, Dropping to 0 Hit Points).
+    var over=rest-was;
     parts.push("Took "+n+(fromTemp?" ("+fromTemp+" from temp HP)":"")+".");
-    if(state.conc) parts.push("<b>Concentration on "+e_(state.conc)+":</b> roll d20 + 5 vs DC "+Math.max(10,Math.floor(n/2))+"."+(MSH()?" Fail? Mind Sharpener can turn it into a success.":""));
-    if(h.cur===0){ parts.push("<b>0 HP:</b> unconscious, making death saves."+(state.conc?" Concentration ends.":"")); dropConc(); }
+    if(h.cur>0&&state.conc) parts.push("<b>Concentration on "+e_(state.conc)+":</b> roll d20 + 5 vs DC "+Math.max(10,Math.floor(n/2))+"."+(MSH()?" Fail? Mind Sharpener can turn it into a success.":""));
+    if(h.cur===0&&rest>0){
+      if(over>=h.max) parts.push("<b>Instant death:</b> "+(was===0?"the damage":over+" damage left after 0 HP")+" reaches your HP max ("+h.max+").");
+      else if(was===0) parts.push("<b>Damage at 0 HP:</b> one death save failure, two if it was a critical hit.");
+      else parts.push("<b>0 HP:</b> unconscious, making death saves."+(state.conc?" Concentration ends.":""));
+      dropConc(); }
     hpSay(parts.join(" "));
   }
   $("hpDmg").onclick=function(){ var n=num($("hpAmt").value,0); if(n<=0) return; damage(n); $("hpAmt").value=""; save(); renderHP(); sim(); };
   function heal(n){ var was=state.hp.cur; state.hp.cur=Math.min(state.hp.max,state.hp.cur+n); return state.hp.cur-was; }
   $("hpHeal").onclick=function(){ var n=num($("hpAmt").value,0); if(n<=0) return; hpSay("Healed "+heal(n)+"."); $("hpAmt").value=""; save(); renderHP(); };
-  $("hpTmpSet").onclick=function(){ var n=num($("hpAmt").value,-1); if(n<0) return; state.hp.temp=n; hpSay("Temp HP set to "+n+". Temp HP doesn't stack: a new source replaces the old one."); $("hpAmt").value=""; save(); renderHP(); };
+  $("hpTmpSet").onclick=function(){ var n=num($("hpAmt").value,-1); if(n<0) return; state.hp.temp=n; hpSay("Temp HP set to "+n+". Temp HP doesn't stack: when you gain new temp HP, you keep either the old or the new amount."); $("hpAmt").value=""; save(); renderHP(); };
   $("hpCur").onchange=function(){ state.hp.cur=Math.max(0,Math.min(state.hp.max,num(this.value,state.hp.cur))); save(); renderHP(); };
   $("hpMax").onchange=function(){ state.hp.max=Math.max(1,num(this.value,state.hp.max)); state.hp.cur=Math.min(state.hp.cur,state.hp.max); save(); renderHP(); };
   $("hpTemp").onchange=function(){ state.hp.temp=Math.max(0,num(this.value,state.hp.temp)); save(); renderHP(); };
@@ -772,7 +778,7 @@ input.amt{width:6em;vertical-align:middle}
       if(bonus==="yes" && slot==="atk1") notes.push("The extra 1d6 applies to your first hit this turn only. If this misses, it carries to the Extra Attack.");
       if(bonus==="maybe") notes.push("Add the extra 1d6 only if Attack 1 missed (mark Attack 1 hit or miss to update this).");
       if(bonus==="no") notes.push("Extra 1d6 already used on Attack 1.");
-      rows.push(["Disadvantage if", "A hostile creature is within 5 ft of you, or the target is 91–300 ft away."]);
+      rows.push(["Disadvantage if", "A hostile creature that can see you and isn't incapacitated is within 5 ft of you, or the target is 91–300 ft away."]);
       notes.push("Advantage if the target is outlined by Faerie Fire. Prone targets impose disadvantage on ranged attacks.");
     }
     return {rows:rows,notes:notes};
@@ -823,7 +829,7 @@ input.amt{width:6em;vertical-align:middle}
       {id:"mm",name:"Magic Missile",tags:["auto-hit","120 ft"],lv:[1,2],spell:true,leveled:true,card:function(lv){ var n=lv+2; return {rows:[["Roll","No attack roll: every dart hits."],["Damage",'<span class="force">'+d(n+" × (1d4 + 1)")+" force</span>"]],notes:["Split "+n+" darts among targets you can see within 120 ft.","Shield spell blocks all darts."]}; }},
       {id:"tw",name:"Thunderwave",tags:["15 ft cube","CON save"],lv:[1,2],spell:true,leveled:true,card:function(lv){ var n=lv+1; return {rows:[["Each creature", d("d20 + its CON save")+vs("your DC 16")],["Fail",'<span class="thunder">'+d(n+"d8")+" thunder</span> and pushed 10 ft away from you."],["Success","Half damage, no push."]],notes:["Cube starts at your space. Allies in it get hit too: watch for Malakai and bear-form Zephyra in melee.","Audible out to 300 ft."]}; }},
       {id:"brew",name:"Caustic Brew",tags:["30×5 ft line","DEX save"],lv:[1,2],spell:true,leveled:true,conc:true,card:function(lv){ var n=lv*2; return {rows:[["Each creature", d("d20 + its DEX save")+vs("your DC 16")],["Fail","Covered in acid: takes "+'<span class="acid">'+d(n+"d4")+" acid</span> at the start of each of its turns."],["Success","Nothing."]],notes:["Lasts until a creature uses its action to scrape it off, or your concentration ends (1 min)."]}; }},
-      {id:"ff",name:"Faerie Fire",tags:["20 ft cube","DEX save"],lv:[1,2],spell:true,leveled:true,conc:true,card:function(){ return {rows:[["Each creature", d("d20 + its DEX save")+vs("your DC 16")],["Fail","Outlined for 1 min: attacks against it have advantage, it can't be invisible."],["Success","Nothing."]],notes:["Cast at 1st level; a higher slot adds nothing.","Cast before Malakai and Zephyra swing: advantage for both."]}; }},
+      {id:"ff",name:"Faerie Fire",tags:["20 ft cube","DEX save"],lv:[1,2],spell:true,leveled:true,conc:true,card:function(){ return {rows:[["Each creature", d("d20 + its DEX save")+vs("your DC 16")],["Fail","Outlined for 1 min: attacks against it have advantage if the attacker can see it, and it can't be invisible."],["Success","Nothing."]],notes:["Cast at 1st level; a higher slot adds nothing.","Cast before Malakai and Zephyra swing: advantage for both."]}; }},
       {id:"grease",name:"Grease",tags:["10 ft square","DEX save"],lv:[1,2],spell:true,leveled:true,card:function(){ return {rows:[["Each creature", d("d20 + its DEX save")+vs("your DC 16")],["Fail","Falls prone."],["Later","Anyone entering the area or ending its turn there saves again."]],notes:["Difficult terrain for 1 min, no concentration.",M()==="g"?"Prone targets give your gauntlet attacks advantage.":"Prone targets give your launcher shots disadvantage."]}; }},
       {id:"cmd",name:"Command",tags:["60 ft","WIS save"],lv:["free",1,2],free:"cmd",spell:true,leveled:true,card:function(lv){ var n=(lv==="free"?1:lv); return {rows:[["Targets", d(String(n))],["Each target", d("d20 + its WIS save")+vs("your DC 16")],["Fail","Follows your one-word command on its next turn: approach, drop, flee, grovel, halt."],["Success","Nothing."]],notes:["No effect on undead, creatures that don't understand your language, or a command that's directly harmful to it.","Extra targets must be within 30 ft of each other.","Grovel = prone for your allies."]}; }},
       {id:"shatter",name:"Shatter",tags:["10 ft radius","CON save"],lv:[2],spell:true,leveled:true,card:function(){ return {rows:[["Each creature", d("d20 + its CON save")+vs("your DC 16")],["Fail",'<span class="thunder">'+d("3d8")+" thunder</span>"],["Success","Half damage."]],notes:["Stone, metal or crystal creatures save with disadvantage.","60 ft range. Heard 100 ft away."]}; }},
@@ -834,7 +840,7 @@ input.amt{width:6em;vertical-align:middle}
       {id:"dodge",name:"Dodge",tags:["defense"],card:function(){ return {rows:[["Until your next turn","Attacks against you have disadvantage (if you see the attacker). Your DEX saves have advantage."]],notes:["Lost if you're incapacitated or your speed drops to 0."]}; }},
       {id:"diseng",name:"Disengage",tags:["no OAs"],card:function(){ return {rows:[["This turn","Your movement doesn't provoke opportunity attacks."]],notes:[]}; }},
       {id:"help",name:"Help",tags:["ally advantage"],card:function(){ return {rows:[["Effect","One ally gets advantage on its next attack against a creature within 5 ft of you, or on an ability check."]],notes:["Lasts until the start of your next turn.","Best on Malakai's next swing if he acts before you do again."]}; }},
-      {id:"hide",name:"Hide",tags:["Stealth"],card:function(){ return {rows:[["You roll", d(M()==="i"?"d20 + 5":"d20 + 5, disadvantage")+' <span class="vs">(Stealth)</span>'+vs("each enemy's passive Perception")]],notes:[M()==="i"?"Dampening Field advantage cancels scale mail's disadvantage: roll once.":"Scale mail gives disadvantage on Stealth in Guardian.","You need cover or heavy obscurement to try."]}; }},
+      {id:"hide",name:"Hide",tags:["Stealth"],card:function(){ return {rows:[["You roll", d(M()==="i"?"d20 + 5":"d20 + 5, disadvantage")+' <span class="vs">(Stealth)</span>'+vs("each enemy's passive Perception")]],notes:[M()==="i"?"Dampening Field advantage cancels scale mail's disadvantage: roll once.":"Scale mail gives disadvantage on Stealth in Guardian.","You can't hide from a creature that can see you clearly. The DM decides when hiding is possible."]}; }},
       {id:"ready",name:"Ready",tags:["uses reaction"],card:function(){ return {rows:[["Now","Name a trigger and the action you'll take."],["When it fires","Use your reaction to act."]],notes:["A readied spell uses its slot now and needs concentration until it goes off.","A readied Attack is only one attack (no Extra Attack)."]}; }}
     ].concat(itemOpts()); },
     atk1:function(){ return atkOpts("atk1"); },
@@ -850,17 +856,17 @@ input.amt{width:6em;vertical-align:middle}
       var cmd = turn.bonus && turn.bonus.id==="homu";
       if(!cmd) return [{id:"dodge",name:"Dodge (default)",tags:["not commanded"],card:function(){ return {rows:[["Its turn","Moves (fly 30 ft) and Dodges: attacks against it have disadvantage and its DEX saves (+5) have advantage."],["Evasion","DEX save for half: success = no damage, fail = half."]],notes:["Use your bonus action on it to get Force Strike.","If you're incapacitated, it can take any action it chooses instead of Dodging."]}; }}];
       return [
-        {id:"strike",name:"Force Strike",tags:["30 ft","+8"],outcome:true,card:function(){ return {rows:[["Roll", d("d20 + 8")+vs("target's AC")],["Hit",'<span class="force">'+d("1d4 + 3")+" force</span>"],["Crit (nat 20)",'<span class="force">'+d("2d4 + 3")+" force</span>"]],notes:["Acts right after your turn. Fly 30 ft, AC 13, HP 11."]}; }},
+        {id:"strike",name:"Force Strike",tags:["30 ft","+8"],outcome:true,card:function(){ return {rows:[["Roll", d("d20 + 8")+vs("target's AC")],["Hit",'<span class="force">'+d("1d4 + 3")+" force</span>"],["Crit (nat 20)",'<span class="force">'+d("2d4 + 3")+" force</span>"]],notes:["Ranged weapon attack against one target it can see: disadvantage if a hostile creature that can see it is within 5 ft of it.","Acts right after your turn. Fly 30 ft, AC 13, HP 11."]}; }},
         {id:"help",name:"Help",tags:["ally advantage"],card:function(){ return {rows:[["Effect","An ally's next attack against a creature within 5 ft of the homunculus has advantage."]],notes:["Fly next to Malakai's or Zephyra's target so their next attack has advantage."]}; }},
         {id:"dash",name:"Dash",tags:["fly 60 ft"],card:function(){ return {rows:[["Movement", d("60 ft")+' <span class="vs">flying</span>']],notes:["Scout, or carry it into position for Channel Magic."]}; }},
         {id:"diseng",name:"Disengage",tags:["no OAs"],card:function(){ return {rows:[["This turn","Its movement doesn't provoke opportunity attacks."]],notes:[]}; }},
-        {id:"hide",name:"Hide",tags:["Stealth +5"],card:function(){ return {rows:[["It rolls", d("d20 + 5")+' <span class="vs">(Stealth)</span>'+vs("each enemy's passive Perception")]],notes:["Tiny, so light cover is often enough."]}; }},
+        {id:"hide",name:"Hide",tags:["Stealth +5"],card:function(){ return {rows:[["It rolls", d("d20 + 5")+' <span class="vs">(Stealth)</span>'+vs("each enemy's passive Perception")]],notes:["It can't hide from a creature that can see it clearly. The DM decides when hiding is possible."]}; }},
         {id:"search",name:"Search",tags:["Perception +6"],card:function(){ return {rows:[["It rolls", d("d20 + 6")+' <span class="vs">(Perception)</span>'+vs("DC set by the DM, or a hider's Stealth")]],notes:["Good scout: passive Perception 16, darkvision 60 ft."]}; }}
       ];
     },
     react:function(){ return [
       {id:"hold",name:"Hold it",tags:["until next turn"],card:function(){ return {rows:[["Reaction","Available until the start of your next turn."]],notes:["Concentrating and hit? Roll d20 + 5 vs DC 10 or half the damage, whichever is higher."+(MSH()?" If it fails, Mind Sharpener can save it.":"")]}; }},
-      (M()==="g"||hasSword())&&{id:"oa",name:"Opportunity attack",tags:[M()==="g"?"gauntlet":"shortsword"],card:function(){ var c = M()==="g" ? attackCard("atk1") : sword.card(); c.notes=["Trigger: a creature leaves your 5 ft reach.","One attack only, no Extra Attack."].concat(M()==="i"?["Only if the shortsword is already drawn. The launcher can't make opportunity attacks."]:[]); return c; }},
+      (M()==="g"||hasSword())&&{id:"oa",name:"Opportunity attack",tags:[M()==="g"?"gauntlet":"shortsword"],card:function(){ var c = M()==="g" ? attackCard("atk1") : sword.card(); c.notes=["Trigger: a hostile creature you can see leaves your 5 ft reach.","One attack only, no Extra Attack."].concat(M()==="i"?["Only if the shortsword is already drawn. The launcher can't make opportunity attacks."]:[]); return c; }},
       {id:"absorb",name:"Absorb Elements",tags:["when hit"],lv:[1,2],spell:true,leveled:true,card:function(lv){ return {rows:[["Trigger","You take acid, cold, fire, lightning or thunder damage."],["Effect","Resistance to that type, including the triggering hit, until the start of your next turn."],["Next melee hit",'+'+d(lv+"d6")+" of that type"]],notes:[M()==="i"?"Launcher shots aren't melee, so no bonus damage in Infiltrator.":"Stacks nicely on your first gauntlet hit next turn."]}; }},
       {id:"feather",name:"Feather Fall",tags:["60 ft"],lv:[1,2],spell:true,leveled:true,card:function(){ return {rows:[["Trigger","You or creatures within 60 ft fall."],["Effect","Up to 5 creatures fall 60 ft/round and take no fall damage."]],notes:[]}; }},
       MSH()&&{id:"sharp",name:"Mind Sharpener",tags:["concentration","1 charge"],fixed:"msc",card:function(){ return {rows:[["First roll", d("d20 + 5")+vs("DC 10 or half the damage, whichever is higher")],["If you fail","Spend 1 charge: the failed save becomes a success."]],notes:["Pick this only if you actually spend the charge. Regains 1d4 charges at dawn."]}; }}
@@ -913,7 +919,7 @@ input.amt{width:6em;vertical-align:middle}
   }
   var LAST={
     brew:function(lv){ return {len:9,acid:true,dice:(2*lv)+"d4",text:"Each creature covered in acid takes "+(2*lv)+"d4 acid at the start of its turn. Ends early if it uses its action to scrape it off."}; },
-    ff:function(){ return {len:9,text:"Outlined creatures: attacks against them have advantage, and they can't be invisible."}; },
+    ff:function(){ return {len:9,text:"Outlined creatures: attacks against them have advantage if the attacker can see them, and they can't be invisible."}; },
     grease:function(){ return {len:9,text:"A creature entering the grease or ending its turn there: DEX save vs DC 16 or fall prone. Difficult terrain."}; },
     sanct:function(){ return {len:9,text:"Anyone targeting the warded creature with an attack or harmful spell: WIS save vs DC 16 or pick another target. Ends if the warded creature attacks or harms an enemy."}; },
     mirror:function(){ return {len:9,text:"When you're attacked, roll d20: 6+ with 3 duplicates, 8+ with 2, 11+ with 1, and the attack targets a duplicate (AC 12)."}; },
