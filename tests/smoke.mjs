@@ -15,6 +15,15 @@ await page.goto(url);
 assert.equal(await page.textContent("#ac"), "18");
 await page.click("#infToggles button:nth-child(1)"); // Enhanced Defense on (HS already on => 2/2)
 assert.equal(await page.textContent("#ac"), "19");
+// With the homunculus, Enhanced Defense can go on the armor or the shield; on the shield it needs the shield carried
+await page.click('#edSeg button:has-text("Shield")');
+await page.click('#shSeg button:has-text("None")');
+assert.equal(await page.textContent("#ac"), "16");
+assert.match(await page.textContent("#edMsg"), /adds nothing to AC/);
+await page.click('#edSeg button:has-text("Armor")');
+assert.equal(await page.textContent("#ac"), "17");
+await page.click("#shSeg button:nth-child(1)");
+assert.equal(await page.textContent("#ac"), "19");
 await page.click("#infToggles button:nth-child(3)"); // Homunculus off
 const steps = await page.$$eval("#simSteps button", (b) => b.map((x) => x.firstChild.textContent));
 assert.ok(!steps.includes("Homunculus"));
@@ -22,6 +31,13 @@ assert.ok(!steps.includes("Homunculus"));
 // Enhanced Weapon on gauntlets => +9 / 1d8 + 6
 await page.click("#infToggles button:nth-child(2)");
 await page.click("#ewSeg button:nth-child(1)");
+// Enhanced Weapon on the gauntlets occupies the armor, so Enhanced Defense is forced onto the shield
+assert.match(await page.textContent("#edMsg"), /armor holds Enhanced Weapon \(Thunder Gauntlets\)/);
+assert.equal(await page.isDisabled('#edSeg button:has-text("Armor")'), true);
+await page.click('#shSeg button:has-text("None")');
+assert.equal(await page.textContent("#ac"), "16");
+await page.click("#shSeg button:nth-child(1)");
+assert.equal(await page.textContent("#ac"), "19");
 await page.click("#simNext");
 await page.click('.opt[data-o="attack"]');
 await page.click("#simNext");
@@ -80,6 +96,12 @@ assert.equal(await page.textContent("#eqSubmit"), "Add item");
 
 // Shortsword follows equipment: removing it hides the sim option and the Enhanced Weapon choice
 await page.click('[data-m="i"]');
+// A shortsword hit on Attack 1 leaves the launcher's extra 1d6 for the Extra Attack
+await page.click("#simNew"); await page.click("#simNext");
+await page.click('.opt[data-o="attack"]'); await page.click("#simNext");
+await page.click('.opt[data-o="sword"]'); await page.click('[data-out="hit"]'); await page.click("#simNext");
+await page.click('.opt[data-o="strike"]');
+assert.match(await page.textContent("#simPanel"), /1d6 \+ 1d6 \+ 5/);
 await page.click("#ewSeg button:nth-child(3)"); // Enhanced Weapon on the shortsword
 await page.click('[aria-label="Remove Shortsword"]');
 assert.equal(await page.$$eval("#ewSeg button", (b) => b.length), 3); // still the target: kept, with a warning
@@ -89,6 +111,40 @@ assert.equal(await page.$$eval("#ewSeg button", (b) => b.length), 2);
 await page.click("#simNew"); await page.click("#simNext");
 await page.click('.opt[data-o="attack"]'); await page.click("#simNext");
 assert.equal(await page.$('.opt[data-o="sword"]'), null);
+// Infiltrator without a shortsword has no opportunity attack
+await page.click('#simSteps button:has-text("Reaction")');
+assert.equal(await page.$('.opt[data-o="oa"]'), null);
+assert.doesNotMatch(await page.textContent("#turnList"), /opportunity/);
+
+// Long rest ends ongoing effects and concentration, and resets the round
+assert.match(await page.textContent("#simFx"), /Caustic Brew/);
+await page.click("#reset");
+assert.equal(await page.isHidden("#simFx"), true);
+assert.equal(await page.textContent("#simConc"), "");
+assert.equal(await page.textContent("#simRound"), "Round 1");
+
+// Damage at 0 HP: a death save failure, or instant death when it reaches the HP max
+await page.fill("#hpCur", "0"); await page.dispatchEvent("#hpCur", "change");
+await page.fill("#hpAmt", "5"); await page.click("#hpDmg");
+assert.match(await page.textContent("#hpMsg"), /one death save failure/);
+await page.fill("#hpCur", "10"); await page.dispatchEvent("#hpCur", "change");
+await page.fill("#hpAmt", "48"); await page.click("#hpDmg");
+assert.match(await page.textContent("#hpMsg"), /Instant death: 38 damage left after 0 HP/);
+await page.click("#reset");
+
+// Mind Sharpener and Enhanced Weapon on the gauntlets can't share the armor
+await page.click("#infToggles button:nth-child(1)"); // Enhanced Defense off (Enhanced Weapon on gauntlets stays)
+assert.equal(await page.isDisabled("#infToggles button:nth-child(4)"), true);
+assert.match(await page.textContent("#infToggles button:nth-child(4)"), /Armor holds Enhanced Weapon/);
+await page.click("#infToggles button:nth-child(2)"); // Enhanced Weapon off
+await page.click("#infToggles button:nth-child(4)"); // Mind Sharpener on
+assert.match(await page.textContent("#infToggles button:nth-child(2)"), /no shortsword/);
+await page.fill("#eqName", "Shortsword"); await page.fill("#eqQty", "1");
+await page.selectOption("#eqKind", "gear"); await page.click("#eqAdd button[type=submit]");
+await page.click("#infToggles button:nth-child(2)"); // Enhanced Weapon on: lands on the shortsword
+assert.equal(await page.getAttribute('#ewSeg button:has-text("Shortsword")', "aria-pressed"), "true");
+assert.equal(await page.isDisabled('#ewSeg button:has-text("Gauntlets")'), true);
+assert.match(await page.textContent("#ewSeg"), /Armor holds Mind Sharpener/);
 
 // Migration from the first equipment build: untouched guessed potion dropped, edits kept, sheet items merged in
 await page.evaluate(() => localStorage.setItem("sol-sheet-v1", JSON.stringify({ eq: [
@@ -103,6 +159,11 @@ assert.match(inv, /Crossbow bolts−7\+/);
 assert.match(inv, /Rope/);
 assert.match(inv, /Bedroll/);
 assert.equal(inv.match(/Smith's tools/g).length, 1);
+
+// A saved state from before the one-infusion-per-object rule shows the conflict
+await page.evaluate(() => localStorage.setItem("sol-sheet-v1", JSON.stringify({ inf: ["ms", "ew"], ew: "g" })));
+await page.reload();
+assert.match(await page.textContent("#ewMsg"), /both on the armor/);
 
 assert.deepEqual(errors, []);
 await browser.close();

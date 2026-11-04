@@ -127,6 +127,11 @@ li{margin-bottom:6px}
 .chip.on{background:var(--verd);color:var(--panel)}
 .chip.off{background:none;border:1px solid var(--line);color:var(--muted)}
 .row.inactive .name,.row.inactive .eff{opacity:.55}
+.lrow button .whyin{display:block;font-weight:400;font-size:.72rem;color:var(--warn)}
+.lrow button.blocked:disabled{opacity:.7}
+.lmsg{grid-column:1/-1;margin:0;font-size:.85rem;color:var(--muted)}
+.lmsg:empty{display:none}
+.lmsg b{color:var(--warn)}
 /* ---------- turn simulator ---------- */
 .sim{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:clip}
 .simhead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
@@ -308,7 +313,11 @@ input.amt{width:6em;vertical-align:middle}
     <div class="lrow"><span class="llab">Active infusions <span class="cnt" id="infCount"></span></span>
       <div class="toggles" id="infToggles" role="group" aria-label="Active infusions"></div></div>
     <div class="lrow" id="ewRow"><span class="llab">Enhanced Weapon is on</span>
-      <div class="seg" id="ewSeg" role="group" aria-label="Enhanced Weapon target"></div></div>
+      <div class="seg" id="ewSeg" role="group" aria-label="Enhanced Weapon target"></div>
+      <p class="lmsg" id="ewMsg" aria-live="polite"></p></div>
+    <div class="lrow" id="edRow"><span class="llab">Enhanced Defense is on</span>
+      <div class="seg" id="edSeg" role="group" aria-label="Enhanced Defense target"></div>
+      <p class="lmsg" id="edMsg" aria-live="polite"></p></div>
     <div class="lrow"><span class="llab">Shield</span>
       <div class="seg" id="shSeg" role="group" aria-label="Shield"></div></div>
   </div>
@@ -363,19 +372,19 @@ input.amt{width:6em;vertical-align:middle}
     <div class="row"><span class="name">Tasha's Caustic Brew</span> <span class="chip c">C</span><span class="chips"><span class="chip">Action</span><span class="chip">30×5 ft line</span><span class="chip">DEX save</span></span>
       <div class="eff"><span class="acid">2d4 acid</span> at the start of each of their turns until someone uses an action to scrape it off. +2d4 per slot above.</div></div>
     <div class="row"><span class="name">Faerie Fire</span> <span class="chip c">C</span><span class="chips"><span class="chip">Action</span><span class="chip">60 ft, 20 ft cube</span><span class="chip">DEX save</span></span>
-      <div class="eff">Outlined creatures: attacks against them have advantage, can't be invisible. 1 min.</div></div>
+      <div class="eff">Outlined creatures: attacks against them have advantage if the attacker can see them; they can't be invisible. 1 min.</div></div>
     <div class="row"><span class="name">Grease</span><span class="chips"><span class="chip">Action</span><span class="chip">60 ft, 10 ft square</span><span class="chip">DEX save</span></span>
       <div class="eff">Fall prone on fail (also when entering or ending turn there). Difficult terrain, 1 min, no concentration.</div></div>
     <div class="row"><span class="name">Command</span><span class="chips"><span class="chip">Action</span><span class="chip">60 ft</span><span class="chip">WIS save</span></span>
       <div class="eff">One word for their next turn: approach, drop, flee, grovel, halt. Not vs. undead. 1 free cast per long rest (Fey Touched).</div></div>
     <div class="row"><span class="name">Sanctuary</span><span class="chips"><span class="chip">Bonus</span><span class="chip">30 ft</span></span>
-      <div class="eff">Attackers must pass a WIS save or pick another target. Ends if the warded creature attacks or casts at an enemy. Doesn't stop area damage.</div></div>
+      <div class="eff">Attackers must pass a WIS save or pick another target. Ends if the warded creature attacks, casts a spell that affects an enemy, or deals damage. Doesn't stop area damage.</div></div>
     <div class="row"><span class="name">Absorb Elements</span><span class="chips"><span class="chip">Reaction</span><span class="chip">Self</span></span>
       <div class="eff">When hit by acid/cold/fire/lightning/thunder: resistance to it until your next turn; first melee hit next turn +1d6 of that type.</div></div>
     <div class="row"><span class="name">Feather Fall</span><span class="chips"><span class="chip">Reaction</span><span class="chip">60 ft</span></span>
       <div class="eff">Up to 5 falling creatures drop 60 ft/round, no fall damage.</div></div>
     <div class="row"><span class="name">Alarm</span><span class="chips"><span class="chip">1 min</span><span class="chip">Ritual</span><span class="chip">30 ft, 20 ft cube</span></span>
-      <div class="eff">Ward an area or door for 8 hours. A Tiny or larger creature entering it triggers a mental ping (wakes you) or a 10-second bell. You choose creatures it ignores. Ritual cast: +10 min, no slot.</div></div>
+      <div class="eff">Ward a door, window or area for 8 hours. A Tiny or larger creature touching or entering it triggers a mental ping (within 1 mile, wakes you) or a hand bell for 10 seconds (heard 60 ft). You choose creatures it ignores. Ritual cast: +10 min, no slot.</div></div>
     <div class="row"><span class="name">Detect Magic</span> <span class="chip c">C</span><span class="chips"><span class="chip">Ritual</span><span class="chip">Sense 30 ft</span></span>
       <div class="eff">See magic auras and their school, 10 min.</div></div>
     <div class="row"><span class="name">Identify</span><span class="chips"><span class="chip">Ritual</span><span class="chip">Touch</span></span>
@@ -395,7 +404,7 @@ input.amt{width:6em;vertical-align:middle}
   <div id="homuSec">
   <h2>Homunculus servant</h2>
   <div class="rows">
-    <div class="row"><span class="name">Stats</span><div class="eff">HP 11 (1 + INT 5 + level 5), AC 13, walk 20 ft, fly 30 ft. DEX save +5, Stealth +5, Perception +6 (passive 16), darkvision 60 ft. Evasion; immune to poison. Shares your initiative and takes its turn right after yours. <i>Mending</i> heals it 2d6.</div></div>
+    <div class="row"><span class="name">Stats</span><div class="eff">HP 11 (1 + INT 5 + level 5), AC 13, walk 20 ft, fly 30 ft. DEX save +5, Stealth +5, Perception +6 (passive 16), darkvision 60 ft. Evasion; immune to poison damage, exhaustion and the poisoned condition. Shares your initiative and takes its turn right after yours. <i>Mending</i> heals it 2d6.</div></div>
     <div class="row"><span class="name">Force Strike</span><span class="chips"><span class="chip">Your bonus action</span><span class="chip">30 ft</span><span class="chip">+8</span></span>
       <div class="eff"><span class="force">1d4+3 force</span>. If you don't command it, it just Dodges. If you're incapacitated, it can take any action it chooses.</div></div>
     <div class="row"><span class="name">Channel Magic</span><span class="chips"><span class="chip">Its reaction</span><span class="chip">120 ft</span></span>
@@ -408,7 +417,7 @@ input.amt{width:6em;vertical-align:middle}
 
   <h2>Utility</h2>
   <ul>
-    <li><b>Magical Tinkering</b> (action, thieves' or artisan's tools in hand, touch a Tiny nonmagical object): dim light 5 ft, a 6-second recorded message, an odor or sound, or a static image. Max 5 at once.</li>
+    <li><b>Magical Tinkering</b> (action, thieves' or artisan's tools in hand, touch a Tiny nonmagical object): bright light 5 ft and dim light 5 ft beyond, a 6-second recorded message, an odor or sound, or a static image. Max 5 at once.</li>
     <li><b>Right Tool for the Job:</b> 1 hour with thieves' or artisan's tools makes one set of artisan's tools.</li>
     <li><b>Elf:</b> advantage vs. charm, immune to magical sleep, 4-hour trance.</li>
   </ul>
@@ -419,8 +428,8 @@ input.amt{width:6em;vertical-align:middle}
     <li><b>Faerie Fire</b> before the party's attack round gives everyone advantage.</li>
     <li><b>Bonus action spell rule:</b> cast Misty Step or Sanctuary and your only other spell that turn can be a 1-action cantrip.</li>
     <li><b>Concentration:</b> Caustic Brew, Faerie Fire and Detect Magic can't run together. Damage forces a CON save (+5), DC 10 or half the damage.</li>
-    <li><b>Light crossbow</b> has Loading: only one shot per turn even with Extra Attack. Use the launcher instead.</li>
-    <li><b>Ritual Caster</b> spells (Detect Magic, Identify) are ritual-only (+10 min) unless you also prepare them as artificer spells.</li>
+    <li><b>Light crossbow</b> has Loading: only one shot per turn even with Extra Attack. It is also two-handed, so not with your shield. Use the launcher instead.</li>
+    <li><b>Ritual Caster</b> spells (Detect Magic, Identify) are ritual-only (+10 min, ritual book in hand) unless you also prepare them as artificer spells.</li>
     <li><b>Prepared:</b> you can prepare 7 (INT +5, half level 2), and all 7 are used: Absorb Elements, Alarm, Faerie Fire, Feather Fall, Grease, Sanctuary, Tasha's Caustic Brew. Armorer and Fey Touched spells don't count.</li>
     <li id="acNote"></li>
   </ul>
@@ -428,7 +437,7 @@ input.amt{width:6em;vertical-align:middle}
   <h2 id="tracker">Tracker</h2>
   <div class="track" id="track"></div>
   <button type="button" class="btn reset" id="reset">Long rest: reset all</button>
-  <p class="note">Tap a pip to mark it used. Long rest also restores HP and clears temp HP. It doesn't refill Mind Sharpener: it regains 1d4 charges at dawn, so tap those back yourself. Saved on this device only.</p>
+  <p class="note">Tap a pip to mark it used. Long rest also restores HP, clears temp HP, ends ongoing effects and concentration, and resets the round to 1. It doesn't refill Mind Sharpener: it regains 1d4 charges at dawn, so tap those back yourself. Saved on this device only.</p>
 
   <h2 id="equipment">Equipment</h2>
   <div class="eq">
@@ -469,7 +478,15 @@ input.amt{width:6em;vertical-align:middle}
   function on(id){ return state.inf.indexOf(id)>=0; }
   function HS(){ return on("hs"); }
   function MSH(){ return on("ms"); }
-  function AC(){ return 14+2+(state.shield?2:0)+(on("ed")?1:0); }
+  // An object can bear only one infusion (TCE Infuse Item). Mind Sharpener sits on the armor (Sol has no robes).
+  // Enhanced Weapon on the gauntlets or launcher sits on the armor too (DM call: the armor's weapons are the armor).
+  function ewOnArmor(){ return on("ew")&&state.ew!=="s"; }
+  function armorHolder(){ return on("ms") ? "Mind Sharpener" : (ewOnArmor() ? "Enhanced Weapon ("+WBASE[state.ew].name+")" : null); }
+  function infConflict(){ return on("ms")&&ewOnArmor(); }
+  // Enhanced Defense target: "a" armor or "s" shield. Forced onto the shield when the armor holds another infusion.
+  function edOn(){ return armorHolder() ? "s" : (state.edOn==="s" ? "s" : "a"); }
+  function edAC(){ return on("ed")&&(edOn()==="a"||state.shield) ? 1 : 0; }
+  function AC(){ return 14+2+(state.shield?2:0)+edAC(); }
   var WBASE={g:{name:"Thunder Gauntlets",atk:8,dmg:5,n:1,die:"d8",type:"thunder"},
              i:{name:"Lightning Launcher",atk:8,dmg:5,n:1,die:"d6",type:"lightning"},
              s:{name:"Shortsword",atk:5,dmg:2,n:1,die:"d6",type:"piercing"}};
@@ -494,10 +511,16 @@ input.amt{width:6em;vertical-align:middle}
     // infusion toggles
     var full=state.inf.length>=INF_MAX, tg=document.getElementById("infToggles"); tg.innerHTML="";
     INF.forEach(function(f){
-      var b=document.createElement("button"); b.type="button"; b.textContent=f.name;
-      var act=on(f.id); b.setAttribute("aria-pressed",act?"true":"false");
+      var b=document.createElement("button"); b.type="button";
+      var act=on(f.id), why=null; b.setAttribute("aria-pressed",act?"true":"false");
       if(!act&&full){ b.disabled=true; b.title="Two infusions already active. Turn one off first."; }
-      b.onclick=function(){ if(on(f.id)) state.inf=state.inf.filter(function(x){ return x!==f.id; }); else if(state.inf.length<INF_MAX) state.inf.push(f.id); save(); refresh(); };
+      else if(!act&&f.id==="ms"&&ewOnArmor()) why="Armor holds Enhanced Weapon";
+      else if(!act&&f.id==="ew"&&on("ms")&&!hasSword()) why="Armor holds Mind Sharpener, no shortsword";
+      blockBtn(b,f.name,why);
+      b.onclick=function(){
+        if(on(f.id)) state.inf=state.inf.filter(function(x){ return x!==f.id; });
+        else if(state.inf.length<INF_MAX){ state.inf.push(f.id); if(f.id==="ew"&&on("ms")) state.ew="s"; }
+        save(); refresh(); };
       tg.appendChild(b);
     });
     document.getElementById("infCount").textContent=state.inf.length+" of "+INF_MAX+" active";
@@ -506,12 +529,31 @@ input.amt{width:6em;vertical-align:middle}
     var ewSeg=document.getElementById("ewSeg"); ewSeg.innerHTML="";
     [["g","Gauntlets"],["i","Launcher"],["s","Shortsword"]].forEach(function(o){
       if(o[0]==="s" && !hasSword() && state.ew!=="s") return;
-      var b=document.createElement("button"); b.type="button"; b.textContent=o[1];
+      var b=document.createElement("button"); b.type="button";
       b.setAttribute("aria-pressed",state.ew===o[0]?"true":"false");
+      blockBtn(b,o[1],o[0]!=="s"&&on("ms")&&state.ew!==o[0] ? "Armor holds Mind Sharpener" : null);
       b.onclick=function(){ state.ew=o[0]; save(); refresh(); }; ewSeg.appendChild(b);
     });
+    document.getElementById("ewMsg").innerHTML = infConflict()
+      ? '<b>Mind Sharpener and Enhanced Weapon are both on the armor.</b> An object can hold only one infusion. '+(hasSword()?"Move Enhanced Weapon to the shortsword, or turn one off.":"Turn one of them off.")
+      : (on("ms") ? "Gauntlets and launcher are part of the armor, which holds Mind Sharpener. An object can hold only one infusion." : "");
+
+    var ed=edOn(), holder=armorHolder();
+    document.getElementById("edRow").hidden=!on("ed");
+    var edSeg=document.getElementById("edSeg"); edSeg.innerHTML="";
+    [["a","Armor"],["s","Shield"]].forEach(function(o){
+      var b=document.createElement("button"); b.type="button";
+      b.setAttribute("aria-pressed",ed===o[0]?"true":"false");
+      blockBtn(b,o[1],o[0]==="a"&&holder ? "Holds "+holder.replace(/ \(.*/,"") : null);
+      b.onclick=function(){ state.edOn=o[0]; save(); refresh(); }; edSeg.appendChild(b);
+    });
+    var edMsg=[];
+    if(holder) edMsg.push("On the shield: the armor holds "+e_(holder)+", and an object can hold only one infusion.");
+    if(ed==="s"&&!state.shield) edMsg.push("<b>You carry no shield, so Enhanced Defense adds nothing to AC.</b>");
+    document.getElementById("edMsg").innerHTML=edMsg.join(" ");
+
     var shSeg=document.getElementById("shSeg"); shSeg.innerHTML="";
-    [[true,"Carried (+2 AC)"],[false,"None"]].forEach(function(o){
+    [[true,"Carried (+"+(on("ed")&&ed==="s"?"3 AC with Enhanced Defense":"2 AC")+")"],[false,"None"]].forEach(function(o){
       var b=document.createElement("button"); b.type="button"; b.textContent=o[1];
       b.setAttribute("aria-pressed",state.shield===o[0]?"true":"false");
       b.onclick=function(){ state.shield=o[0]; save(); refresh(); }; shSeg.appendChild(b);
@@ -530,11 +572,11 @@ input.amt{width:6em;vertical-align:middle}
       '<div class="weapon"><span class="name big">Lightning Launcher</span> <span class="chips"><span class="chip">Range 90/300 ft</span><span class="chip">'+sg(i.atk)+'</span>'+ewTag(i)+'</span></div>'+
       '<p><span class="lightning">1d6'+sg(i.dmg)+' lightning</span>, two attacks per Attack action; once per turn a hit adds <span class="lightning">+1d6</span> (≈'+Math.round(2*(3.5+i.dmg)+3.5)+' dmg if both hit).</p>'+
       '<p><b>Powered Steps:</b> speed 35 ft. <b>Dampening Field:</b> advantage on Stealth, which cancels scale mail\'s disadvantage (roll normally).</p>'+
-      '<p class="note">Disadvantage if a hostile creature is within 5 ft of you, or beyond 90 ft. Shortsword for close range: '+sg(sw.atk)+', 1d6'+sg(sw.dmg)+' piercing'+(sw.plus?" (Enhanced)":"")+'; drawing it is your free object interaction.</p>';
+      '<p class="note">Disadvantage if a hostile creature that can see you and isn\'t incapacitated is within 5 ft of you, or beyond 90 ft. Shortsword for close range: '+sg(sw.atk)+', 1d6'+sg(sw.dmg)+' piercing'+(sw.plus?" (Enhanced)":"")+'; drawing it is your free object interaction.</p>';
 
     // turn list
     var bonus=["Defensive Field (Guardian)"]; if(HS()) bonus.push("command the homunculus"); bonus.push("Misty Step","Sanctuary");
-    var react=["Absorb Elements","Feather Fall"]; if(MSH()) react.push("Mind Sharpener"); react.push(m==="g"?"opportunity attack (gauntlet)":"opportunity attack (shortsword, if drawn)");
+    var react=["Absorb Elements","Feather Fall"]; if(MSH()) react.push("Mind Sharpener"); if(m==="g") react.push("opportunity attack (gauntlet)"); else if(hasSword()) react.push("opportunity attack (shortsword, if drawn)");
     document.getElementById("turnList").innerHTML=
       '<dt>Action</dt><dd>Attack (2 hits with '+(m==="g"?"gauntlets":"launcher")+'), <i>or</i> cast a spell / Mind Sliver, <i>or</i> Magical Tinkering, Dash, Dodge, Help.</dd>'+
       '<dt>Bonus</dt><dd>'+bonus.join(", ")+'.</dd>'+
@@ -546,13 +588,19 @@ input.amt{width:6em;vertical-align:middle}
     var il=document.getElementById("infList"); il.innerHTML="";
     INF.forEach(function(f){
       var act=on(f.id), extra="";
-      if(f.id==="ew"&&act) extra=" Currently on: "+W(state.ew).name+"."+(state.ew==="s"&&!hasSword()?" The shortsword isn't in your equipment.":"");
+      if(f.id==="ew"&&act) extra=" Currently on: "+W(state.ew).name+"."+(state.ew==="s"&&!hasSword()?" The shortsword isn't in your equipment.":"")+(infConflict()?" Conflict: the armor also holds Mind Sharpener.":"");
+      if(f.id==="ed"&&act) extra=" Currently on: the "+(ed==="s"?"shield":"armor")+"."+(edAC()?"":" You carry no shield, so no +1 AC.");
       il.insertAdjacentHTML("beforeend",'<div class="row'+(act?"":" inactive")+'"><span class="name">'+e_(f.name)+'</span> <span class="chips"><span class="chip '+(act?"on":"off")+'">'+(act?"Active":"Known")+'</span></span><div class="eff">'+e_(f.desc+extra)+'</div></div>');
     });
 
     document.getElementById("modelNote").innerHTML="Armor is your spellcasting focus and can't be removed against your will. Switching model needs smith's tools in hand."+(hasItem(/smith/i)?"":' <span class="warn">No smith\'s tools in your equipment.</span>');
 
-    document.getElementById("acNote").innerHTML='<b>AC '+AC()+'</b> = scale mail 14 + DEX 2'+(state.shield?" + shield 2":"")+(on("ed")?" + Enhanced Defense 1":"")+'. The printed sheet says 18.';
+    document.getElementById("acNote").innerHTML='<b>AC '+AC()+'</b> = scale mail 14 + DEX 2'+(state.shield?" + shield 2":"")+(edAC()?" + Enhanced Defense 1":"")+'.'+(on("ed")&&!edAC()?" Enhanced Defense is on the shield, which you don't carry.":"")+' The printed sheet says 18.';
+  }
+  // Disabled-by-rule buttons show the reason inside the button.
+  function blockBtn(b,label,why){
+    b.innerHTML=e_(label)+(why?'<small class="whyin">'+e_(why)+'</small>':"");
+    if(why){ b.disabled=true; b.classList.add("blocked"); }
   }
 
   // ---------- equipment ----------
@@ -644,7 +692,7 @@ input.amt{width:6em;vertical-align:middle}
       row.appendChild(lab); row.appendChild(pips); box.appendChild(row);
     });
   }
-  document.getElementById("reset").addEventListener("click",function(){ var k=state.used.msc; state.used={}; if(k) state.used.msc=k; state.hp.cur=state.hp.max; state.hp.temp=0; state.hhp=11; save(); renderTrack(); renderHP(); sim(); });
+  document.getElementById("reset").addEventListener("click",function(){ var k=state.used.msc; state.used={}; if(k) state.used.msc=k; state.hp.cur=state.hp.max; state.hp.temp=0; state.hhp=HOMU_MAX; dropConc(); state.fx=[]; state.round=1; save(); renderTrack(); renderHP(); sim(); });
   // ---------- hit points ----------
   var HOMU_MAX=11; // 1 + INT 5 + artificer level 5
   if(!state.hp||typeof state.hp.cur!=="number") state.hp={cur:38,max:38,temp:0};
@@ -667,17 +715,23 @@ input.amt{width:6em;vertical-align:middle}
   }
   function hpSay(t){ $("hpMsg").innerHTML=t; }
   function damage(n){
-    var h=state.hp, fromTemp=Math.min(h.temp,n), rest=n-fromTemp, parts=[];
+    var h=state.hp, was=h.cur, fromTemp=Math.min(h.temp,n), rest=n-fromTemp, parts=[];
     h.temp-=fromTemp; h.cur=Math.max(0,h.cur-rest);
+    // Instant death when the damage left after reaching 0 HP is at least the HP max (2014 PHB, Dropping to 0 Hit Points).
+    var over=rest-was;
     parts.push("Took "+n+(fromTemp?" ("+fromTemp+" from temp HP)":"")+".");
-    if(state.conc) parts.push("<b>Concentration on "+e_(state.conc)+":</b> roll d20 + 5 vs DC "+Math.max(10,Math.floor(n/2))+"."+(MSH()?" Fail? Mind Sharpener can turn it into a success.":""));
-    if(h.cur===0){ parts.push("<b>0 HP:</b> unconscious, making death saves."+(state.conc?" Concentration ends.":"")); dropConc(); }
+    if(h.cur>0&&state.conc) parts.push("<b>Concentration on "+e_(state.conc)+":</b> roll d20 + 5 vs DC "+Math.max(10,Math.floor(n/2))+"."+(MSH()?" Fail? Mind Sharpener can turn it into a success.":""));
+    if(h.cur===0&&rest>0){
+      if(over>=h.max) parts.push("<b>Instant death:</b> "+(was===0?"the damage":over+" damage left after 0 HP")+" reaches your HP max ("+h.max+").");
+      else if(was===0) parts.push("<b>Damage at 0 HP:</b> one death save failure, two if it was a critical hit.");
+      else parts.push("<b>0 HP:</b> unconscious, making death saves."+(state.conc?" Concentration ends.":""));
+      dropConc(); }
     hpSay(parts.join(" "));
   }
   $("hpDmg").onclick=function(){ var n=num($("hpAmt").value,0); if(n<=0) return; damage(n); $("hpAmt").value=""; save(); renderHP(); sim(); };
   function heal(n){ var was=state.hp.cur; state.hp.cur=Math.min(state.hp.max,state.hp.cur+n); return state.hp.cur-was; }
   $("hpHeal").onclick=function(){ var n=num($("hpAmt").value,0); if(n<=0) return; hpSay("Healed "+heal(n)+"."); $("hpAmt").value=""; save(); renderHP(); };
-  $("hpTmpSet").onclick=function(){ var n=num($("hpAmt").value,-1); if(n<0) return; state.hp.temp=n; hpSay("Temp HP set to "+n+". Temp HP doesn't stack: a new source replaces the old one."); $("hpAmt").value=""; save(); renderHP(); };
+  $("hpTmpSet").onclick=function(){ var n=num($("hpAmt").value,-1); if(n<0) return; state.hp.temp=n; hpSay("Temp HP set to "+n+". Temp HP doesn't stack: when you gain new temp HP, you keep either the old or the new amount."); $("hpAmt").value=""; save(); renderHP(); };
   $("hpCur").onchange=function(){ state.hp.cur=Math.max(0,Math.min(state.hp.max,num(this.value,state.hp.cur))); save(); renderHP(); };
   $("hpMax").onchange=function(){ state.hp.max=Math.max(1,num(this.value,state.hp.max)); state.hp.cur=Math.min(state.hp.cur,state.hp.max); save(); renderHP(); };
   $("hpTemp").onchange=function(){ state.hp.temp=Math.max(0,num(this.value,state.hp.temp)); save(); renderHP(); };
@@ -697,7 +751,7 @@ input.amt{width:6em;vertical-align:middle}
   function save_(ab){ return [["Target rolls", d("d20 + its "+ab+" save")+vs("your DC 16")]]; }
   var LVNAME={free:"Free cast",1:"1st-level slot",2:"2nd-level slot"};
 
-  var turn={}, out={}, cur=0, msg="";
+  var turn={}, out={}, cur=0;
 
   // Options per slot. Each: id, name, tags, lv (slot choices), free (free-cast key), fixed (resource key),
   // spell, leveled, conc, outcome (hit/miss tracking), card(lv) -> {rows:[[label,html]], notes:[]}
@@ -711,11 +765,12 @@ input.amt{width:6em;vertical-align:middle}
       notes.push("Melee 5 ft. Gauntlet hand must be empty.");
       notes.push("Advantage if the target is prone (Grease, Shove) or outlined by Faerie Fire.");
     }else{
-      var bonus;
-      if(slot==="atk2"){
+      // The extra 1d6 is spent only by a launcher hit on Attack 1 (a sword hit or grapple leaves it unspent).
+      var bonus="yes", a1=turn.atk1;
+      if(slot==="atk2" && (!a1 || a1.id==="strike")){
         var o=out.atk1;
         bonus = (o==="hit"||o==="crit") ? "no" : (o==="miss" ? "yes" : "maybe");
-      }else bonus="yes";
+      }
       var extra = bonus==="no" ? "" : ' + 1d6';
       var extraC = bonus==="no" ? "" : ' + 2d6';
       rows.push(["Hit", '<span class="lightning">'+d("1d6"+extra+" + "+w.dmg)+' lightning</span>']);
@@ -723,7 +778,7 @@ input.amt{width:6em;vertical-align:middle}
       if(bonus==="yes" && slot==="atk1") notes.push("The extra 1d6 applies to your first hit this turn only. If this misses, it carries to the Extra Attack.");
       if(bonus==="maybe") notes.push("Add the extra 1d6 only if Attack 1 missed (mark Attack 1 hit or miss to update this).");
       if(bonus==="no") notes.push("Extra 1d6 already used on Attack 1.");
-      rows.push(["Disadvantage if", "A hostile creature is within 5 ft of you, or the target is 91–300 ft away."]);
+      rows.push(["Disadvantage if", "A hostile creature that can see you and isn't incapacitated is within 5 ft of you, or the target is 91–300 ft away."]);
       notes.push("Advantage if the target is outlined by Faerie Fire. Prone targets impose disadvantage on ranged attacks.");
     }
     return {rows:rows,notes:notes};
@@ -746,12 +801,12 @@ input.amt{width:6em;vertical-align:middle}
     return {id:"item-"+x.id,item:x.id,name:(heal?"Drink ":"Use ")+x.name,tags:[heal?"heals "+(x.detail||"?"):"action",x.qty+" left"],card:function(){
       var c=turn.action||{}, who=c.who||"self", rows=[], notes=[];
       if(heal){
-        rows.push(["Heal", d(esc(x.detail||"?"))]);
+        rows.push(["Heal", d(e_(x.detail||"?"))]);
         rows.push(["Who",'<div class="seg" role="group" aria-label="Who drinks it" style="margin:0">'+[["self","Sol"],["ally","Ally within 5 ft"]].map(function(w){ return '<button type="button" data-who="'+w[0]+'" aria-pressed="'+(who===w[0]?"true":"false")+'">'+w[1]+'</button>'; }).join("")+'</div>']);
         if(who==="self") rows.push(["You rolled",'<input class="amt" id="itemAmt" type="number" inputmode="numeric" min="0" placeholder="Total" aria-label="Amount healed"'+(c.amt?' value="'+c.amt+'"':"")+'> <span class="vs">added to your HP when you end the turn</span>']);
         notes.push("2014 rules: drinking a potion, or feeding it to an ally, takes your action. Some DMs use the 2024 bonus-action rule; ask.");
       }else{
-        rows.push(["Effect", x.detail?esc(x.detail):"As the item describes."]);
+        rows.push(["Effect", x.detail?e_(x.detail):"As the item describes."]);
         notes.push("Using an item takes your action (the Use an Object action).");
       }
       notes.push(x.qty+" in your equipment; ending the turn uses one.");
@@ -774,7 +829,7 @@ input.amt{width:6em;vertical-align:middle}
       {id:"mm",name:"Magic Missile",tags:["auto-hit","120 ft"],lv:[1,2],spell:true,leveled:true,card:function(lv){ var n=lv+2; return {rows:[["Roll","No attack roll: every dart hits."],["Damage",'<span class="force">'+d(n+" × (1d4 + 1)")+" force</span>"]],notes:["Split "+n+" darts among targets you can see within 120 ft.","Shield spell blocks all darts."]}; }},
       {id:"tw",name:"Thunderwave",tags:["15 ft cube","CON save"],lv:[1,2],spell:true,leveled:true,card:function(lv){ var n=lv+1; return {rows:[["Each creature", d("d20 + its CON save")+vs("your DC 16")],["Fail",'<span class="thunder">'+d(n+"d8")+" thunder</span> and pushed 10 ft away from you."],["Success","Half damage, no push."]],notes:["Cube starts at your space. Allies in it get hit too: watch for Malakai and bear-form Zephyra in melee.","Audible out to 300 ft."]}; }},
       {id:"brew",name:"Caustic Brew",tags:["30×5 ft line","DEX save"],lv:[1,2],spell:true,leveled:true,conc:true,card:function(lv){ var n=lv*2; return {rows:[["Each creature", d("d20 + its DEX save")+vs("your DC 16")],["Fail","Covered in acid: takes "+'<span class="acid">'+d(n+"d4")+" acid</span> at the start of each of its turns."],["Success","Nothing."]],notes:["Lasts until a creature uses its action to scrape it off, or your concentration ends (1 min)."]}; }},
-      {id:"ff",name:"Faerie Fire",tags:["20 ft cube","DEX save"],lv:[1,2],spell:true,leveled:true,conc:true,card:function(){ return {rows:[["Each creature", d("d20 + its DEX save")+vs("your DC 16")],["Fail","Outlined for 1 min: attacks against it have advantage, it can't be invisible."],["Success","Nothing."]],notes:["Cast at 1st level; a higher slot adds nothing.","Cast before Malakai and Zephyra swing: advantage for both."]}; }},
+      {id:"ff",name:"Faerie Fire",tags:["20 ft cube","DEX save"],lv:[1,2],spell:true,leveled:true,conc:true,card:function(){ return {rows:[["Each creature", d("d20 + its DEX save")+vs("your DC 16")],["Fail","Outlined for 1 min: attacks against it have advantage if the attacker can see it, and it can't be invisible."],["Success","Nothing."]],notes:["Cast at 1st level; a higher slot adds nothing.","Cast before Malakai and Zephyra swing: advantage for both."]}; }},
       {id:"grease",name:"Grease",tags:["10 ft square","DEX save"],lv:[1,2],spell:true,leveled:true,card:function(){ return {rows:[["Each creature", d("d20 + its DEX save")+vs("your DC 16")],["Fail","Falls prone."],["Later","Anyone entering the area or ending its turn there saves again."]],notes:["Difficult terrain for 1 min, no concentration.",M()==="g"?"Prone targets give your gauntlet attacks advantage.":"Prone targets give your launcher shots disadvantage."]}; }},
       {id:"cmd",name:"Command",tags:["60 ft","WIS save"],lv:["free",1,2],free:"cmd",spell:true,leveled:true,card:function(lv){ var n=(lv==="free"?1:lv); return {rows:[["Targets", d(String(n))],["Each target", d("d20 + its WIS save")+vs("your DC 16")],["Fail","Follows your one-word command on its next turn: approach, drop, flee, grovel, halt."],["Success","Nothing."]],notes:["No effect on undead, creatures that don't understand your language, or a command that's directly harmful to it.","Extra targets must be within 30 ft of each other.","Grovel = prone for your allies."]}; }},
       {id:"shatter",name:"Shatter",tags:["10 ft radius","CON save"],lv:[2],spell:true,leveled:true,card:function(){ return {rows:[["Each creature", d("d20 + its CON save")+vs("your DC 16")],["Fail",'<span class="thunder">'+d("3d8")+" thunder</span>"],["Success","Half damage."]],notes:["Stone, metal or crystal creatures save with disadvantage.","60 ft range. Heard 100 ft away."]}; }},
@@ -785,7 +840,7 @@ input.amt{width:6em;vertical-align:middle}
       {id:"dodge",name:"Dodge",tags:["defense"],card:function(){ return {rows:[["Until your next turn","Attacks against you have disadvantage (if you see the attacker). Your DEX saves have advantage."]],notes:["Lost if you're incapacitated or your speed drops to 0."]}; }},
       {id:"diseng",name:"Disengage",tags:["no OAs"],card:function(){ return {rows:[["This turn","Your movement doesn't provoke opportunity attacks."]],notes:[]}; }},
       {id:"help",name:"Help",tags:["ally advantage"],card:function(){ return {rows:[["Effect","One ally gets advantage on its next attack against a creature within 5 ft of you, or on an ability check."]],notes:["Lasts until the start of your next turn.","Best on Malakai's next swing if he acts before you do again."]}; }},
-      {id:"hide",name:"Hide",tags:["Stealth"],card:function(){ return {rows:[["You roll", d(M()==="i"?"d20 + 5":"d20 + 5, disadvantage")+' <span class="vs">(Stealth)</span>'+vs("each enemy's passive Perception")]],notes:[M()==="i"?"Dampening Field advantage cancels scale mail's disadvantage: roll once.":"Scale mail gives disadvantage on Stealth in Guardian.","You need cover or heavy obscurement to try."]}; }},
+      {id:"hide",name:"Hide",tags:["Stealth"],card:function(){ return {rows:[["You roll", d(M()==="i"?"d20 + 5":"d20 + 5, disadvantage")+' <span class="vs">(Stealth)</span>'+vs("each enemy's passive Perception")]],notes:[M()==="i"?"Dampening Field advantage cancels scale mail's disadvantage: roll once.":"Scale mail gives disadvantage on Stealth in Guardian.","You can't hide from a creature that can see you clearly. The DM decides when hiding is possible."]}; }},
       {id:"ready",name:"Ready",tags:["uses reaction"],card:function(){ return {rows:[["Now","Name a trigger and the action you'll take."],["When it fires","Use your reaction to act."]],notes:["A readied spell uses its slot now and needs concentration until it goes off.","A readied Attack is only one attack (no Extra Attack)."]}; }}
     ].concat(itemOpts()); },
     atk1:function(){ return atkOpts("atk1"); },
@@ -801,17 +856,17 @@ input.amt{width:6em;vertical-align:middle}
       var cmd = turn.bonus && turn.bonus.id==="homu";
       if(!cmd) return [{id:"dodge",name:"Dodge (default)",tags:["not commanded"],card:function(){ return {rows:[["Its turn","Moves (fly 30 ft) and Dodges: attacks against it have disadvantage and its DEX saves (+5) have advantage."],["Evasion","DEX save for half: success = no damage, fail = half."]],notes:["Use your bonus action on it to get Force Strike.","If you're incapacitated, it can take any action it chooses instead of Dodging."]}; }}];
       return [
-        {id:"strike",name:"Force Strike",tags:["30 ft","+8"],outcome:true,card:function(){ return {rows:[["Roll", d("d20 + 8")+vs("target's AC")],["Hit",'<span class="force">'+d("1d4 + 3")+" force</span>"],["Crit (nat 20)",'<span class="force">'+d("2d4 + 3")+" force</span>"]],notes:["Acts right after your turn. Fly 30 ft, AC 13, HP 11."]}; }},
+        {id:"strike",name:"Force Strike",tags:["30 ft","+8"],outcome:true,card:function(){ return {rows:[["Roll", d("d20 + 8")+vs("target's AC")],["Hit",'<span class="force">'+d("1d4 + 3")+" force</span>"],["Crit (nat 20)",'<span class="force">'+d("2d4 + 3")+" force</span>"]],notes:["Ranged weapon attack against one target it can see: disadvantage if a hostile creature that can see it is within 5 ft of it.","Acts right after your turn. Fly 30 ft, AC 13, HP 11."]}; }},
         {id:"help",name:"Help",tags:["ally advantage"],card:function(){ return {rows:[["Effect","An ally's next attack against a creature within 5 ft of the homunculus has advantage."]],notes:["Fly next to Malakai's or Zephyra's target so their next attack has advantage."]}; }},
         {id:"dash",name:"Dash",tags:["fly 60 ft"],card:function(){ return {rows:[["Movement", d("60 ft")+' <span class="vs">flying</span>']],notes:["Scout, or carry it into position for Channel Magic."]}; }},
         {id:"diseng",name:"Disengage",tags:["no OAs"],card:function(){ return {rows:[["This turn","Its movement doesn't provoke opportunity attacks."]],notes:[]}; }},
-        {id:"hide",name:"Hide",tags:["Stealth +5"],card:function(){ return {rows:[["It rolls", d("d20 + 5")+' <span class="vs">(Stealth)</span>'+vs("each enemy's passive Perception")]],notes:["Tiny, so light cover is often enough."]}; }},
+        {id:"hide",name:"Hide",tags:["Stealth +5"],card:function(){ return {rows:[["It rolls", d("d20 + 5")+' <span class="vs">(Stealth)</span>'+vs("each enemy's passive Perception")]],notes:["It can't hide from a creature that can see it clearly. The DM decides when hiding is possible."]}; }},
         {id:"search",name:"Search",tags:["Perception +6"],card:function(){ return {rows:[["It rolls", d("d20 + 6")+' <span class="vs">(Perception)</span>'+vs("DC set by the DM, or a hider's Stealth")]],notes:["Good scout: passive Perception 16, darkvision 60 ft."]}; }}
       ];
     },
     react:function(){ return [
       {id:"hold",name:"Hold it",tags:["until next turn"],card:function(){ return {rows:[["Reaction","Available until the start of your next turn."]],notes:["Concentrating and hit? Roll d20 + 5 vs DC 10 or half the damage, whichever is higher."+(MSH()?" If it fails, Mind Sharpener can save it.":"")]}; }},
-      {id:"oa",name:"Opportunity attack",tags:[M()==="g"?"gauntlet":"shortsword"],card:function(){ var c = M()==="g" ? attackCard("atk1") : sword.card(); c.notes=["Trigger: a creature leaves your 5 ft reach.","One attack only, no Extra Attack."].concat(M()==="i"?["Only if the shortsword is already drawn. The launcher can't make opportunity attacks."]:[]); return c; }},
+      (M()==="g"||hasSword())&&{id:"oa",name:"Opportunity attack",tags:[M()==="g"?"gauntlet":"shortsword"],card:function(){ var c = M()==="g" ? attackCard("atk1") : sword.card(); c.notes=["Trigger: a hostile creature you can see leaves your 5 ft reach.","One attack only, no Extra Attack."].concat(M()==="i"?["Only if the shortsword is already drawn. The launcher can't make opportunity attacks."]:[]); return c; }},
       {id:"absorb",name:"Absorb Elements",tags:["when hit"],lv:[1,2],spell:true,leveled:true,card:function(lv){ return {rows:[["Trigger","You take acid, cold, fire, lightning or thunder damage."],["Effect","Resistance to that type, including the triggering hit, until the start of your next turn."],["Next melee hit",'+'+d(lv+"d6")+" of that type"]],notes:[M()==="i"?"Launcher shots aren't melee, so no bonus damage in Infiltrator.":"Stacks nicely on your first gauntlet hit next turn."]}; }},
       {id:"feather",name:"Feather Fall",tags:["60 ft"],lv:[1,2],spell:true,leveled:true,card:function(){ return {rows:[["Trigger","You or creatures within 60 ft fall."],["Effect","Up to 5 creatures fall 60 ft/round and take no fall damage."]],notes:[]}; }},
       MSH()&&{id:"sharp",name:"Mind Sharpener",tags:["concentration","1 charge"],fixed:"msc",card:function(){ return {rows:[["First roll", d("d20 + 5")+vs("DC 10 or half the damage, whichever is higher")],["If you fail","Spend 1 charge: the failed save becomes a success."]],notes:["Pick this only if you actually spend the charge. Regains 1d4 charges at dawn."]}; }}
@@ -838,7 +893,6 @@ input.amt{width:6em;vertical-align:middle}
   function left(key,except){ return MAX[key]-(state.used[key]||0)-pending(key,except); }
   function lvOk(o,lv,slot){ var k=costKey(o,lv); return !k || left(k,slot)>0; }
   function whyDisabled(slot,o){
-    if(o.guardOnly && M()!=="g") return o.id==="oa" ? "Launcher is ranged: no opportunity attacks in Infiltrator." : "Guardian model only.";
     if(o.fixed && left(o.fixed,slot)<=0) return "No uses left.";
     if(o.id==="tinker" && !hasTinkerTools()) return "Needs thieves' or artisan's tools in your equipment.";
     if(o.lv && !o.lv.some(function(lv){ return lvOk(o,lv,slot); })) return "No spell slots left for this.";
@@ -865,7 +919,7 @@ input.amt{width:6em;vertical-align:middle}
   }
   var LAST={
     brew:function(lv){ return {len:9,acid:true,dice:(2*lv)+"d4",text:"Each creature covered in acid takes "+(2*lv)+"d4 acid at the start of its turn. Ends early if it uses its action to scrape it off."}; },
-    ff:function(){ return {len:9,text:"Outlined creatures: attacks against them have advantage, and they can't be invisible."}; },
+    ff:function(){ return {len:9,text:"Outlined creatures: attacks against them have advantage if the attacker can see them, and they can't be invisible."}; },
     grease:function(){ return {len:9,text:"A creature entering the grease or ending its turn there: DEX save vs DC 16 or fall prone. Difficult terrain."}; },
     sanct:function(){ return {len:9,text:"Anyone targeting the warded creature with an attack or harmful spell: WIS save vs DC 16 or pick another target. Ends if the warded creature attacks or harms an enemy."}; },
     mirror:function(){ return {len:9,text:"When you're attacked, roll d20: 6+ with 3 duplicates, 8+ with 2, 11+ with 1, and the attack targets a duplicate (AC 12)."}; },
@@ -875,7 +929,6 @@ input.amt{width:6em;vertical-align:middle}
     absorb:function(lv){ return {len:1,text:"Resistance to the triggering type until your turn starts. First melee hit on your next turn: +"+lv+"d6 of that type."}; }
   };
   if(!Array.isArray(state.fx)) state.fx=[];
-  // one-time migration: old concentration without an effect entry stays as a badge only
   function dropConc(){ state.conc=null; state.fx=state.fx.filter(function(f){ return !f.conc; }); }
   function kindOf(o,slot){ if(slot==="action"&&o.id==="attack") return "weapon"; if(o.item) return "item"; return o.leveled?"spell":(o.spell?"cantrip":"other"); }
   function lvlBadge(o){ if(!o.lv) return "Cantrip"; var n=o.lv.filter(function(l){ return l!=="free"; }); var m=Math.min.apply(null,n); return m===1?"1st":"2nd"; }
@@ -886,14 +939,13 @@ input.amt{width:6em;vertical-align:middle}
     var h='<div class="fxh">Ongoing effects</div>';
     state.fx.forEach(function(f,i){
       var left=f.until-state.round+1;
-      h+='<div class="fx'+(f.acid?" fx-acid":"")+'"><div class="fxn">'+esc(f.name)+(f.conc?" (concentration)":"")+'<small>'+(left<=1?"last round":left+" rounds left")+'</small></div>'+
-        '<div class="fxt">'+esc(f.text)+(f.acid?'<span class="roll-now">When each covered creature\'s turn starts: roll '+esc(f.dice)+' acid.</span>':"")+'</div>'+
-        '<button type="button" data-fx="'+i+'" aria-label="End '+esc(f.name)+'">End</button></div>';
+      h+='<div class="fx'+(f.acid?" fx-acid":"")+'"><div class="fxn">'+e_(f.name)+(f.conc?" (concentration)":"")+'<small>'+(left<=1?"last round":left+" rounds left")+'</small></div>'+
+        '<div class="fxt">'+e_(f.text)+(f.acid?'<span class="roll-now">When each covered creature\'s turn starts: roll '+e_(f.dice)+' acid.</span>':"")+'</div>'+
+        '<button type="button" data-fx="'+i+'" aria-label="End '+e_(f.name)+'">End</button></div>';
     });
     box.innerHTML=h;
     box.querySelectorAll("[data-fx]").forEach(function(b){ b.onclick=function(){ var f=state.fx[+b.dataset.fx]; if(f&&f.conc) state.conc=null; state.fx.splice(+b.dataset.fx,1); save(); sim(); }; });
   }
-  function esc(t){ return String(t).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
 
   // Mobile: keep the part you're acting on in view (Back/Next are sticky at the bottom).
   var shownCur=-1, revealCard=false;
@@ -923,7 +975,7 @@ input.amt{width:6em;vertical-align:middle}
     document.getElementById("simRound").textContent="Round "+state.round;
     document.getElementById("simModel").textContent=(M()==="g"?"Guardian":"Infiltrator")+" · AC "+AC()+" · "+S()+" ft";
     var cEl=document.getElementById("simConc");
-    cEl.innerHTML = state.conc ? '<span class="conc">Concentrating: '+esc(state.conc)+' <button type="button" id="dropConc" aria-label="Drop concentration">✕</button></span>' : "";
+    cEl.innerHTML = state.conc ? '<span class="conc">Concentrating: '+e_(state.conc)+' <button type="button" id="dropConc" aria-label="Drop concentration">✕</button></span>' : "";
     if(state.conc) document.getElementById("dropConc").onclick=function(){ dropConc(); save(); sim(); };
     renderFx();
 
@@ -931,7 +983,7 @@ input.amt{width:6em;vertical-align:middle}
     elSteps.innerHTML="";
     st.concat([{id:"_sum",label:"Summary"}]).forEach(function(s,i){
       var li=document.createElement("li"), b=document.createElement("button"); b.type="button";
-      b.innerHTML=esc(s.label)+(turn[s.id]?"<small>"+esc(short(s.id))+"</small>":"");
+      b.innerHTML=e_(s.label)+(turn[s.id]?"<small>"+e_(short(s.id))+"</small>":"");
       if(turn[s.id]) b.className="done";
       if(i===cur) b.setAttribute("aria-current","step");
       b.onclick=function(){ cur=i; sim(); };
@@ -944,7 +996,7 @@ input.amt{width:6em;vertical-align:middle}
     var slot=st[cur], sid=slot.id, sel=turn[sid];
     elNext.textContent = cur+1<st.length ? (sel?"Next: ":"Skip to ")+st[cur+1].label : "Summary";
 
-    var h='<h3>'+esc(slot.q)+'</h3>';
+    var h='<h3>'+e_(slot.q)+'</h3>';
     if(sid==="react") h+='<p class="hint">Your reaction happens off-turn, before your next turn starts.</p>';
     if(sid==="homu") h+='<p class="hint">It acts right after your turn.'+(turn.bonus&&turn.bonus.id==="homu"?" You commanded it.":" You didn't command it, so it Dodges.")+'</p>';
     h+='<div class="opts">';
@@ -955,21 +1007,20 @@ input.amt{width:6em;vertical-align:middle}
     GRP.forEach(function(g){
       var list=opts.filter(function(o){ return kindOf(o,sid)===g[0]; });
       if(!list.length) return;
-      if(grouped) h+='<div class="ogrp">'+esc(g[1])+'</div>';
+      if(grouped) h+='<div class="ogrp">'+e_(g[1])+'</div>';
       list.forEach(function(o){
         var why=whyDisabled(sid,o), on=sel&&sel.id===o.id, k=kindOf(o,sid);
         if(on&&why) reason=why;
         var tags=o.tags.filter(function(t){ return t!=="cantrip"&&t!=="2nd level"; }); if(o.conc) tags.unshift("concentration");
         var badge=(k==="spell"||k==="cantrip")?'<em>'+lvlBadge(o)+'</em>':"";
-        h+='<button type="button" class="opt '+k+'" data-o="'+o.id+'" aria-pressed="'+(on?"true":"false")+'"'+(why&&!on?' disabled title="'+esc(why)+'"':"")+'>'+badge+'<b>'+esc(o.name)+'</b>'+(why&&!on?'<span class="whyin">'+esc(why)+'</span>':(tags.length?'<span>'+esc(tags.join(" · "))+'</span>':""))+'</button>';
+        h+='<button type="button" class="opt '+k+'" data-o="'+o.id+'" aria-pressed="'+(on?"true":"false")+'"'+(why&&!on?' disabled title="'+e_(why)+'"':"")+'>'+badge+'<b>'+e_(o.name)+'</b>'+(why&&!on?'<span class="whyin">'+e_(why)+'</span>':(tags.length?'<span>'+e_(tags.join(" · "))+'</span>':""))+'</button>';
       });
     });
     h+='</div>';
-    // list disabled reasons compactly
 
     if(sel){
       var o=findOpt(sid,sel.id), c=o.card(sel.lv);
-      h+='<div class="card"><h4>'+esc(o.name)+(sel.lv?' <span class="vs">('+LVNAME[sel.lv]+')</span>':"")+'</h4>';
+      h+='<div class="card"><h4>'+e_(o.name)+(sel.lv?' <span class="vs">('+LVNAME[sel.lv]+')</span>':"")+'</h4>';
       if(o.lv && (o.lv.length>1 || o.free)){
         h+='<div class="seg" role="group" aria-label="Cast with">';
         o.lv.forEach(function(lv){ var k=costKey(o,lv), n=k?left(k,sid):0, ok=lvOk(o,lv,sid);
@@ -977,7 +1028,7 @@ input.amt{width:6em;vertical-align:middle}
         h+='</div>';
       }
       h+='<dl class="roll">';
-      c.rows.forEach(function(r){ h+='<dt>'+esc(r[0])+'</dt><dd>'+r[1]+'</dd>'; });
+      c.rows.forEach(function(r){ h+='<dt>'+e_(r[0])+'</dt><dd>'+r[1]+'</dd>'; });
       h+='</dl>';
       if(o.outcome){
         h+='<div class="seg" role="group" aria-label="Result" style="margin-top:10px">';
@@ -985,10 +1036,10 @@ input.amt{width:6em;vertical-align:middle}
         h+='</div>';
       }
       var notes=c.notes.slice();
-      if(o.conc && state.conc && state.conc!==o.name) notes.unshift('<span class="warn">Ends your concentration on '+esc(state.conc)+'.</span>');
+      if(o.conc && state.conc && state.conc!==o.name) notes.unshift('<span class="warn">Ends your concentration on '+e_(state.conc)+'.</span>');
       if(o.conc) notes.push("Concentration: taking damage means d20 + 5 vs DC 10 or half the damage."+(MSH()?" Mind Sharpener can turn a fail into a success.":""));
-      if(reason) notes.unshift('<span class="warn">'+esc(reason)+'</span>');
-      if(notes.length){ h+='<ul>'; notes.forEach(function(n){ h+='<li>'+(n.indexOf("<span")===0?n:esc(n))+'</li>'; }); h+='</ul>'; }
+      if(reason) notes.unshift('<span class="warn">'+e_(reason)+'</span>');
+      if(notes.length){ h+='<ul>'; notes.forEach(function(n){ h+='<li>'+(n.indexOf("<span")===0?n:e_(n))+'</li>'; }); h+='</ul>'; }
       h+='</div>';
     }
     elPanel.innerHTML=h;
@@ -1013,19 +1064,18 @@ input.amt{width:6em;vertical-align:middle}
   }
   function renderSummary(st){
     var h='<h3>Turn summary</h3>';
-    if(msg){ h+='<p class="hint">'+esc(msg)+'</p>'; }
     h+='<ul class="summary">';
     st.forEach(function(s){
       var c=turn[s.id], txt='<small>—</small>';
-      if(c){ var o=findOpt(s.id,c.id); txt=esc(o.name)+(c.lv?' <small>('+LVNAME[c.lv]+')</small>':"")+(out[s.id]?' <small>· '+out[s.id]+'</small>':""); }
-      h+='<li><span class="k">'+esc(s.label)+'</span><span class="v">'+txt+'</span></li>';
+      if(c){ var o=findOpt(s.id,c.id); txt=e_(o.name)+(c.lv?' <small>('+LVNAME[c.lv]+')</small>':"")+(out[s.id]?' <small>· '+out[s.id]+'</small>':""); }
+      h+='<li><span class="k">'+e_(s.label)+'</span><span class="v">'+txt+'</span></li>';
     });
     h+='</ul>';
     var names={}; RES.forEach(function(r){ names[r[0]]=r[1].replace(/s$/,""); });
     var cs=costs();
     var iu=itemUse(), used=cs.map(function(k){ return names[k]; });
     if(iu) used.push(iu.x.name+" ("+(iu.x.qty-1)+" left after)");
-    h+='<p class="note">'+(used.length ? "Uses: "+esc(used.join(", "))+". End turn marks them in the tracker and equipment." : "Uses no limited resources.")+'</p>';
+    h+='<p class="note">'+(used.length ? "Uses: "+e_(used.join(", "))+". End turn marks them in the tracker and equipment." : "Uses no limited resources.")+'</p>';
     if(iu&&iu.x.kind==="heal"&&(iu.c.who||"self")==="self") h+='<p class="note">'+(iu.c.amt?"Heals you "+iu.c.amt+" HP on end turn.":'<span class="warn">No heal roll entered: add it in the Action step, or heal in the HP box.</span>')+'</p>';
     elPanel.innerHTML=h;
   }
@@ -1051,7 +1101,7 @@ input.amt{width:6em;vertical-align:middle}
     state.round++;
     state.fx=state.fx.filter(function(f){ if(state.round>f.until){ if(f.conc&&state.conc===f.base) state.conc=null; return false; } return true; });
     save(); renderHP();
-    turn={}; out={}; cur=0; msg="";
+    turn={}; out={}; cur=0;
     renderTrack(); sim();
   }
   elBack.onclick=function(){ if(cur>0){ cur--; sim(); } };
