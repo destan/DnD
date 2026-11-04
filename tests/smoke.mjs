@@ -80,6 +80,12 @@ assert.equal(await page.textContent("#eqSubmit"), "Add item");
 
 // Shortsword follows equipment: removing it hides the sim option and the Enhanced Weapon choice
 await page.click('[data-m="i"]');
+// A shortsword hit on Attack 1 leaves the launcher's extra 1d6 for the Extra Attack
+await page.click("#simNew"); await page.click("#simNext");
+await page.click('.opt[data-o="attack"]'); await page.click("#simNext");
+await page.click('.opt[data-o="sword"]'); await page.click('[data-out="hit"]'); await page.click("#simNext");
+await page.click('.opt[data-o="strike"]');
+assert.match(await page.textContent("#simPanel"), /1d6 \+ 1d6 \+ 5/);
 await page.click("#ewSeg button:nth-child(3)"); // Enhanced Weapon on the shortsword
 await page.click('[aria-label="Remove Shortsword"]');
 assert.equal(await page.$$eval("#ewSeg button", (b) => b.length), 3); // still the target: kept, with a warning
@@ -89,6 +95,17 @@ assert.equal(await page.$$eval("#ewSeg button", (b) => b.length), 2);
 await page.click("#simNew"); await page.click("#simNext");
 await page.click('.opt[data-o="attack"]'); await page.click("#simNext");
 assert.equal(await page.$('.opt[data-o="sword"]'), null);
+// Infiltrator without a shortsword has no opportunity attack
+await page.click('#simSteps button:has-text("Reaction")');
+assert.equal(await page.$('.opt[data-o="oa"]'), null);
+assert.doesNotMatch(await page.textContent("#turnList"), /opportunity/);
+
+// Long rest ends ongoing effects and concentration, and resets the round
+assert.match(await page.textContent("#simFx"), /Caustic Brew/);
+await page.click("#reset");
+assert.equal(await page.isHidden("#simFx"), true);
+assert.equal(await page.textContent("#simConc"), "");
+assert.equal(await page.textContent("#simRound"), "Round 1");
 
 // Migration from the first equipment build: untouched guessed potion dropped, edits kept, sheet items merged in
 await page.evaluate(() => localStorage.setItem("sol-sheet-v1", JSON.stringify({ eq: [

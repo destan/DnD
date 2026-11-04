@@ -428,7 +428,7 @@ input.amt{width:6em;vertical-align:middle}
   <h2 id="tracker">Tracker</h2>
   <div class="track" id="track"></div>
   <button type="button" class="btn reset" id="reset">Long rest: reset all</button>
-  <p class="note">Tap a pip to mark it used. Long rest also restores HP and clears temp HP. It doesn't refill Mind Sharpener: it regains 1d4 charges at dawn, so tap those back yourself. Saved on this device only.</p>
+  <p class="note">Tap a pip to mark it used. Long rest also restores HP, clears temp HP, ends ongoing effects and concentration, and resets the round to 1. It doesn't refill Mind Sharpener: it regains 1d4 charges at dawn, so tap those back yourself. Saved on this device only.</p>
 
   <h2 id="equipment">Equipment</h2>
   <div class="eq">
@@ -534,7 +534,7 @@ input.amt{width:6em;vertical-align:middle}
 
     // turn list
     var bonus=["Defensive Field (Guardian)"]; if(HS()) bonus.push("command the homunculus"); bonus.push("Misty Step","Sanctuary");
-    var react=["Absorb Elements","Feather Fall"]; if(MSH()) react.push("Mind Sharpener"); react.push(m==="g"?"opportunity attack (gauntlet)":"opportunity attack (shortsword, if drawn)");
+    var react=["Absorb Elements","Feather Fall"]; if(MSH()) react.push("Mind Sharpener"); if(m==="g") react.push("opportunity attack (gauntlet)"); else if(hasSword()) react.push("opportunity attack (shortsword, if drawn)");
     document.getElementById("turnList").innerHTML=
       '<dt>Action</dt><dd>Attack (2 hits with '+(m==="g"?"gauntlets":"launcher")+'), <i>or</i> cast a spell / Mind Sliver, <i>or</i> Magical Tinkering, Dash, Dodge, Help.</dd>'+
       '<dt>Bonus</dt><dd>'+bonus.join(", ")+'.</dd>'+
@@ -644,7 +644,7 @@ input.amt{width:6em;vertical-align:middle}
       row.appendChild(lab); row.appendChild(pips); box.appendChild(row);
     });
   }
-  document.getElementById("reset").addEventListener("click",function(){ var k=state.used.msc; state.used={}; if(k) state.used.msc=k; state.hp.cur=state.hp.max; state.hp.temp=0; state.hhp=11; save(); renderTrack(); renderHP(); sim(); });
+  document.getElementById("reset").addEventListener("click",function(){ var k=state.used.msc; state.used={}; if(k) state.used.msc=k; state.hp.cur=state.hp.max; state.hp.temp=0; state.hhp=HOMU_MAX; dropConc(); state.fx=[]; state.round=1; save(); renderTrack(); renderHP(); sim(); });
   // ---------- hit points ----------
   var HOMU_MAX=11; // 1 + INT 5 + artificer level 5
   if(!state.hp||typeof state.hp.cur!=="number") state.hp={cur:38,max:38,temp:0};
@@ -697,7 +697,7 @@ input.amt{width:6em;vertical-align:middle}
   function save_(ab){ return [["Target rolls", d("d20 + its "+ab+" save")+vs("your DC 16")]]; }
   var LVNAME={free:"Free cast",1:"1st-level slot",2:"2nd-level slot"};
 
-  var turn={}, out={}, cur=0, msg="";
+  var turn={}, out={}, cur=0;
 
   // Options per slot. Each: id, name, tags, lv (slot choices), free (free-cast key), fixed (resource key),
   // spell, leveled, conc, outcome (hit/miss tracking), card(lv) -> {rows:[[label,html]], notes:[]}
@@ -711,11 +711,12 @@ input.amt{width:6em;vertical-align:middle}
       notes.push("Melee 5 ft. Gauntlet hand must be empty.");
       notes.push("Advantage if the target is prone (Grease, Shove) or outlined by Faerie Fire.");
     }else{
-      var bonus;
-      if(slot==="atk2"){
+      // The extra 1d6 is spent only by a launcher hit on Attack 1 (a sword hit or grapple leaves it unspent).
+      var bonus="yes", a1=turn.atk1;
+      if(slot==="atk2" && (!a1 || a1.id==="strike")){
         var o=out.atk1;
         bonus = (o==="hit"||o==="crit") ? "no" : (o==="miss" ? "yes" : "maybe");
-      }else bonus="yes";
+      }
       var extra = bonus==="no" ? "" : ' + 1d6';
       var extraC = bonus==="no" ? "" : ' + 2d6';
       rows.push(["Hit", '<span class="lightning">'+d("1d6"+extra+" + "+w.dmg)+' lightning</span>']);
@@ -746,12 +747,12 @@ input.amt{width:6em;vertical-align:middle}
     return {id:"item-"+x.id,item:x.id,name:(heal?"Drink ":"Use ")+x.name,tags:[heal?"heals "+(x.detail||"?"):"action",x.qty+" left"],card:function(){
       var c=turn.action||{}, who=c.who||"self", rows=[], notes=[];
       if(heal){
-        rows.push(["Heal", d(esc(x.detail||"?"))]);
+        rows.push(["Heal", d(e_(x.detail||"?"))]);
         rows.push(["Who",'<div class="seg" role="group" aria-label="Who drinks it" style="margin:0">'+[["self","Sol"],["ally","Ally within 5 ft"]].map(function(w){ return '<button type="button" data-who="'+w[0]+'" aria-pressed="'+(who===w[0]?"true":"false")+'">'+w[1]+'</button>'; }).join("")+'</div>']);
         if(who==="self") rows.push(["You rolled",'<input class="amt" id="itemAmt" type="number" inputmode="numeric" min="0" placeholder="Total" aria-label="Amount healed"'+(c.amt?' value="'+c.amt+'"':"")+'> <span class="vs">added to your HP when you end the turn</span>']);
         notes.push("2014 rules: drinking a potion, or feeding it to an ally, takes your action. Some DMs use the 2024 bonus-action rule; ask.");
       }else{
-        rows.push(["Effect", x.detail?esc(x.detail):"As the item describes."]);
+        rows.push(["Effect", x.detail?e_(x.detail):"As the item describes."]);
         notes.push("Using an item takes your action (the Use an Object action).");
       }
       notes.push(x.qty+" in your equipment; ending the turn uses one.");
@@ -811,7 +812,7 @@ input.amt{width:6em;vertical-align:middle}
     },
     react:function(){ return [
       {id:"hold",name:"Hold it",tags:["until next turn"],card:function(){ return {rows:[["Reaction","Available until the start of your next turn."]],notes:["Concentrating and hit? Roll d20 + 5 vs DC 10 or half the damage, whichever is higher."+(MSH()?" If it fails, Mind Sharpener can save it.":"")]}; }},
-      {id:"oa",name:"Opportunity attack",tags:[M()==="g"?"gauntlet":"shortsword"],card:function(){ var c = M()==="g" ? attackCard("atk1") : sword.card(); c.notes=["Trigger: a creature leaves your 5 ft reach.","One attack only, no Extra Attack."].concat(M()==="i"?["Only if the shortsword is already drawn. The launcher can't make opportunity attacks."]:[]); return c; }},
+      (M()==="g"||hasSword())&&{id:"oa",name:"Opportunity attack",tags:[M()==="g"?"gauntlet":"shortsword"],card:function(){ var c = M()==="g" ? attackCard("atk1") : sword.card(); c.notes=["Trigger: a creature leaves your 5 ft reach.","One attack only, no Extra Attack."].concat(M()==="i"?["Only if the shortsword is already drawn. The launcher can't make opportunity attacks."]:[]); return c; }},
       {id:"absorb",name:"Absorb Elements",tags:["when hit"],lv:[1,2],spell:true,leveled:true,card:function(lv){ return {rows:[["Trigger","You take acid, cold, fire, lightning or thunder damage."],["Effect","Resistance to that type, including the triggering hit, until the start of your next turn."],["Next melee hit",'+'+d(lv+"d6")+" of that type"]],notes:[M()==="i"?"Launcher shots aren't melee, so no bonus damage in Infiltrator.":"Stacks nicely on your first gauntlet hit next turn."]}; }},
       {id:"feather",name:"Feather Fall",tags:["60 ft"],lv:[1,2],spell:true,leveled:true,card:function(){ return {rows:[["Trigger","You or creatures within 60 ft fall."],["Effect","Up to 5 creatures fall 60 ft/round and take no fall damage."]],notes:[]}; }},
       MSH()&&{id:"sharp",name:"Mind Sharpener",tags:["concentration","1 charge"],fixed:"msc",card:function(){ return {rows:[["First roll", d("d20 + 5")+vs("DC 10 or half the damage, whichever is higher")],["If you fail","Spend 1 charge: the failed save becomes a success."]],notes:["Pick this only if you actually spend the charge. Regains 1d4 charges at dawn."]}; }}
@@ -838,7 +839,6 @@ input.amt{width:6em;vertical-align:middle}
   function left(key,except){ return MAX[key]-(state.used[key]||0)-pending(key,except); }
   function lvOk(o,lv,slot){ var k=costKey(o,lv); return !k || left(k,slot)>0; }
   function whyDisabled(slot,o){
-    if(o.guardOnly && M()!=="g") return o.id==="oa" ? "Launcher is ranged: no opportunity attacks in Infiltrator." : "Guardian model only.";
     if(o.fixed && left(o.fixed,slot)<=0) return "No uses left.";
     if(o.id==="tinker" && !hasTinkerTools()) return "Needs thieves' or artisan's tools in your equipment.";
     if(o.lv && !o.lv.some(function(lv){ return lvOk(o,lv,slot); })) return "No spell slots left for this.";
@@ -875,7 +875,6 @@ input.amt{width:6em;vertical-align:middle}
     absorb:function(lv){ return {len:1,text:"Resistance to the triggering type until your turn starts. First melee hit on your next turn: +"+lv+"d6 of that type."}; }
   };
   if(!Array.isArray(state.fx)) state.fx=[];
-  // one-time migration: old concentration without an effect entry stays as a badge only
   function dropConc(){ state.conc=null; state.fx=state.fx.filter(function(f){ return !f.conc; }); }
   function kindOf(o,slot){ if(slot==="action"&&o.id==="attack") return "weapon"; if(o.item) return "item"; return o.leveled?"spell":(o.spell?"cantrip":"other"); }
   function lvlBadge(o){ if(!o.lv) return "Cantrip"; var n=o.lv.filter(function(l){ return l!=="free"; }); var m=Math.min.apply(null,n); return m===1?"1st":"2nd"; }
@@ -886,14 +885,13 @@ input.amt{width:6em;vertical-align:middle}
     var h='<div class="fxh">Ongoing effects</div>';
     state.fx.forEach(function(f,i){
       var left=f.until-state.round+1;
-      h+='<div class="fx'+(f.acid?" fx-acid":"")+'"><div class="fxn">'+esc(f.name)+(f.conc?" (concentration)":"")+'<small>'+(left<=1?"last round":left+" rounds left")+'</small></div>'+
-        '<div class="fxt">'+esc(f.text)+(f.acid?'<span class="roll-now">When each covered creature\'s turn starts: roll '+esc(f.dice)+' acid.</span>':"")+'</div>'+
-        '<button type="button" data-fx="'+i+'" aria-label="End '+esc(f.name)+'">End</button></div>';
+      h+='<div class="fx'+(f.acid?" fx-acid":"")+'"><div class="fxn">'+e_(f.name)+(f.conc?" (concentration)":"")+'<small>'+(left<=1?"last round":left+" rounds left")+'</small></div>'+
+        '<div class="fxt">'+e_(f.text)+(f.acid?'<span class="roll-now">When each covered creature\'s turn starts: roll '+e_(f.dice)+' acid.</span>':"")+'</div>'+
+        '<button type="button" data-fx="'+i+'" aria-label="End '+e_(f.name)+'">End</button></div>';
     });
     box.innerHTML=h;
     box.querySelectorAll("[data-fx]").forEach(function(b){ b.onclick=function(){ var f=state.fx[+b.dataset.fx]; if(f&&f.conc) state.conc=null; state.fx.splice(+b.dataset.fx,1); save(); sim(); }; });
   }
-  function esc(t){ return String(t).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
 
   // Mobile: keep the part you're acting on in view (Back/Next are sticky at the bottom).
   var shownCur=-1, revealCard=false;
@@ -923,7 +921,7 @@ input.amt{width:6em;vertical-align:middle}
     document.getElementById("simRound").textContent="Round "+state.round;
     document.getElementById("simModel").textContent=(M()==="g"?"Guardian":"Infiltrator")+" · AC "+AC()+" · "+S()+" ft";
     var cEl=document.getElementById("simConc");
-    cEl.innerHTML = state.conc ? '<span class="conc">Concentrating: '+esc(state.conc)+' <button type="button" id="dropConc" aria-label="Drop concentration">✕</button></span>' : "";
+    cEl.innerHTML = state.conc ? '<span class="conc">Concentrating: '+e_(state.conc)+' <button type="button" id="dropConc" aria-label="Drop concentration">✕</button></span>' : "";
     if(state.conc) document.getElementById("dropConc").onclick=function(){ dropConc(); save(); sim(); };
     renderFx();
 
@@ -931,7 +929,7 @@ input.amt{width:6em;vertical-align:middle}
     elSteps.innerHTML="";
     st.concat([{id:"_sum",label:"Summary"}]).forEach(function(s,i){
       var li=document.createElement("li"), b=document.createElement("button"); b.type="button";
-      b.innerHTML=esc(s.label)+(turn[s.id]?"<small>"+esc(short(s.id))+"</small>":"");
+      b.innerHTML=e_(s.label)+(turn[s.id]?"<small>"+e_(short(s.id))+"</small>":"");
       if(turn[s.id]) b.className="done";
       if(i===cur) b.setAttribute("aria-current","step");
       b.onclick=function(){ cur=i; sim(); };
@@ -944,7 +942,7 @@ input.amt{width:6em;vertical-align:middle}
     var slot=st[cur], sid=slot.id, sel=turn[sid];
     elNext.textContent = cur+1<st.length ? (sel?"Next: ":"Skip to ")+st[cur+1].label : "Summary";
 
-    var h='<h3>'+esc(slot.q)+'</h3>';
+    var h='<h3>'+e_(slot.q)+'</h3>';
     if(sid==="react") h+='<p class="hint">Your reaction happens off-turn, before your next turn starts.</p>';
     if(sid==="homu") h+='<p class="hint">It acts right after your turn.'+(turn.bonus&&turn.bonus.id==="homu"?" You commanded it.":" You didn't command it, so it Dodges.")+'</p>';
     h+='<div class="opts">';
@@ -955,21 +953,20 @@ input.amt{width:6em;vertical-align:middle}
     GRP.forEach(function(g){
       var list=opts.filter(function(o){ return kindOf(o,sid)===g[0]; });
       if(!list.length) return;
-      if(grouped) h+='<div class="ogrp">'+esc(g[1])+'</div>';
+      if(grouped) h+='<div class="ogrp">'+e_(g[1])+'</div>';
       list.forEach(function(o){
         var why=whyDisabled(sid,o), on=sel&&sel.id===o.id, k=kindOf(o,sid);
         if(on&&why) reason=why;
         var tags=o.tags.filter(function(t){ return t!=="cantrip"&&t!=="2nd level"; }); if(o.conc) tags.unshift("concentration");
         var badge=(k==="spell"||k==="cantrip")?'<em>'+lvlBadge(o)+'</em>':"";
-        h+='<button type="button" class="opt '+k+'" data-o="'+o.id+'" aria-pressed="'+(on?"true":"false")+'"'+(why&&!on?' disabled title="'+esc(why)+'"':"")+'>'+badge+'<b>'+esc(o.name)+'</b>'+(why&&!on?'<span class="whyin">'+esc(why)+'</span>':(tags.length?'<span>'+esc(tags.join(" · "))+'</span>':""))+'</button>';
+        h+='<button type="button" class="opt '+k+'" data-o="'+o.id+'" aria-pressed="'+(on?"true":"false")+'"'+(why&&!on?' disabled title="'+e_(why)+'"':"")+'>'+badge+'<b>'+e_(o.name)+'</b>'+(why&&!on?'<span class="whyin">'+e_(why)+'</span>':(tags.length?'<span>'+e_(tags.join(" · "))+'</span>':""))+'</button>';
       });
     });
     h+='</div>';
-    // list disabled reasons compactly
 
     if(sel){
       var o=findOpt(sid,sel.id), c=o.card(sel.lv);
-      h+='<div class="card"><h4>'+esc(o.name)+(sel.lv?' <span class="vs">('+LVNAME[sel.lv]+')</span>':"")+'</h4>';
+      h+='<div class="card"><h4>'+e_(o.name)+(sel.lv?' <span class="vs">('+LVNAME[sel.lv]+')</span>':"")+'</h4>';
       if(o.lv && (o.lv.length>1 || o.free)){
         h+='<div class="seg" role="group" aria-label="Cast with">';
         o.lv.forEach(function(lv){ var k=costKey(o,lv), n=k?left(k,sid):0, ok=lvOk(o,lv,sid);
@@ -977,7 +974,7 @@ input.amt{width:6em;vertical-align:middle}
         h+='</div>';
       }
       h+='<dl class="roll">';
-      c.rows.forEach(function(r){ h+='<dt>'+esc(r[0])+'</dt><dd>'+r[1]+'</dd>'; });
+      c.rows.forEach(function(r){ h+='<dt>'+e_(r[0])+'</dt><dd>'+r[1]+'</dd>'; });
       h+='</dl>';
       if(o.outcome){
         h+='<div class="seg" role="group" aria-label="Result" style="margin-top:10px">';
@@ -985,10 +982,10 @@ input.amt{width:6em;vertical-align:middle}
         h+='</div>';
       }
       var notes=c.notes.slice();
-      if(o.conc && state.conc && state.conc!==o.name) notes.unshift('<span class="warn">Ends your concentration on '+esc(state.conc)+'.</span>');
+      if(o.conc && state.conc && state.conc!==o.name) notes.unshift('<span class="warn">Ends your concentration on '+e_(state.conc)+'.</span>');
       if(o.conc) notes.push("Concentration: taking damage means d20 + 5 vs DC 10 or half the damage."+(MSH()?" Mind Sharpener can turn a fail into a success.":""));
-      if(reason) notes.unshift('<span class="warn">'+esc(reason)+'</span>');
-      if(notes.length){ h+='<ul>'; notes.forEach(function(n){ h+='<li>'+(n.indexOf("<span")===0?n:esc(n))+'</li>'; }); h+='</ul>'; }
+      if(reason) notes.unshift('<span class="warn">'+e_(reason)+'</span>');
+      if(notes.length){ h+='<ul>'; notes.forEach(function(n){ h+='<li>'+(n.indexOf("<span")===0?n:e_(n))+'</li>'; }); h+='</ul>'; }
       h+='</div>';
     }
     elPanel.innerHTML=h;
@@ -1013,19 +1010,18 @@ input.amt{width:6em;vertical-align:middle}
   }
   function renderSummary(st){
     var h='<h3>Turn summary</h3>';
-    if(msg){ h+='<p class="hint">'+esc(msg)+'</p>'; }
     h+='<ul class="summary">';
     st.forEach(function(s){
       var c=turn[s.id], txt='<small>—</small>';
-      if(c){ var o=findOpt(s.id,c.id); txt=esc(o.name)+(c.lv?' <small>('+LVNAME[c.lv]+')</small>':"")+(out[s.id]?' <small>· '+out[s.id]+'</small>':""); }
-      h+='<li><span class="k">'+esc(s.label)+'</span><span class="v">'+txt+'</span></li>';
+      if(c){ var o=findOpt(s.id,c.id); txt=e_(o.name)+(c.lv?' <small>('+LVNAME[c.lv]+')</small>':"")+(out[s.id]?' <small>· '+out[s.id]+'</small>':""); }
+      h+='<li><span class="k">'+e_(s.label)+'</span><span class="v">'+txt+'</span></li>';
     });
     h+='</ul>';
     var names={}; RES.forEach(function(r){ names[r[0]]=r[1].replace(/s$/,""); });
     var cs=costs();
     var iu=itemUse(), used=cs.map(function(k){ return names[k]; });
     if(iu) used.push(iu.x.name+" ("+(iu.x.qty-1)+" left after)");
-    h+='<p class="note">'+(used.length ? "Uses: "+esc(used.join(", "))+". End turn marks them in the tracker and equipment." : "Uses no limited resources.")+'</p>';
+    h+='<p class="note">'+(used.length ? "Uses: "+e_(used.join(", "))+". End turn marks them in the tracker and equipment." : "Uses no limited resources.")+'</p>';
     if(iu&&iu.x.kind==="heal"&&(iu.c.who||"self")==="self") h+='<p class="note">'+(iu.c.amt?"Heals you "+iu.c.amt+" HP on end turn.":'<span class="warn">No heal roll entered: add it in the Action step, or heal in the HP box.</span>')+'</p>';
     elPanel.innerHTML=h;
   }
@@ -1051,7 +1047,7 @@ input.amt{width:6em;vertical-align:middle}
     state.round++;
     state.fx=state.fx.filter(function(f){ if(state.round>f.until){ if(f.conc&&state.conc===f.base) state.conc=null; return false; } return true; });
     save(); renderHP();
-    turn={}; out={}; cur=0; msg="";
+    turn={}; out={}; cur=0;
     renderTrack(); sim();
   }
   elBack.onclick=function(){ if(cur>0){ cur--; sim(); } };
